@@ -88,4 +88,6 @@ Akun Contoh (dari database.json)
 - Pengepul: pengepul@example.com (password: pengepul123)
 
 - Pengguna: pengguna@example.com (password: pengguna123)
+
+cat: untuk menambahkan akun, kalian hanya perlu registrasi akun
 ```
