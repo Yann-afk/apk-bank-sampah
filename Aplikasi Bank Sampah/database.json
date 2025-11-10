@@ -24,7 +24,7 @@
       "email": "pengguna@example.com",
       "password": "pengguna123",
       "role": "pengguna",
-      "total_poin": 985869.0,
+      "total_poin": 951384.0,
       "alamat": "Jl. Merdeka No. 12, Depok"
     }
   },
@@ -101,6 +101,16 @@
       "pengepul_id": "u2",
       "notes": "",
       "id": "pf7a6f3"
+    },
+    "pa50ac4": {
+      "user_id": "u3",
+      "tanggal": "2025-11-22",
+      "waktu": "13:24",
+      "lokasi": "Jl. Merdeka No. 12, Depok",
+      "status": "selesai",
+      "pengepul_id": "u2",
+      "notes": "",
+      "id": "pa50ac4"
     }
   },
   "transactions": {
@@ -151,6 +161,54 @@
       "deskripsi": "Tukar: Diamond MLBB",
       "jumlah_poin": -10000,
       "id": "tcbcf14"
+    },
+    "tdc34ff": {
+      "user_id": "u3",
+      "tanggal": "2025-11-10",
+      "tipe": "redeem_reward",
+      "deskripsi": "Tukar: Minyak Goreng 1L",
+      "jumlah_poin": -10000,
+      "id": "tdc34ff"
+    },
+    "t24b40c": {
+      "user_id": "u3",
+      "tanggal": "2025-11-10",
+      "tipe": "setor_sampah",
+      "deskripsi": "Setor sampah (Botol Plastik (PET): 0.2kg, Kardus: 0.5kg, Kaleng Aluminium: 0.4kg)",
+      "jumlah_poin": 515.0,
+      "id": "t24b40c"
+    },
+    "t534158": {
+      "user_id": "u3",
+      "tanggal": "2025-11-10",
+      "tipe": "redeem_reward",
+      "deskripsi": "Tukar: Minyak Goreng 1L",
+      "jumlah_poin": -10000,
+      "id": "t534158"
+    },
+    "t12c490": {
+      "user_id": "u3",
+      "tanggal": "2025-11-10",
+      "tipe": "redeem_reward",
+      "deskripsi": "Tukar: Voucher Pulsa Rp 5.000",
+      "jumlah_poin": -5000,
+      "id": "t12c490"
+    },
+    "t7d2b05": {
+      "user_id": "u3",
+      "tanggal": "2025-11-10",
+      "tipe": "redeem_reward",
+      "deskripsi": "Tukar: Voucher Pulsa Rp 5.000",
+      "jumlah_poin": -5000,
+      "id": "t7d2b05"
+    },
+    "tac5bfc": {
+      "user_id": "u3",
+      "tanggal": "2025-11-10",
+      "tipe": "redeem_reward",
+      "deskripsi": "Tukar: Voucher Pulsa Rp 5.000",
+      "jumlah_poin": -5000,
+      "id": "tac5bfc"
     }
   }
 }
