@@ -1,5 +1,5 @@
 
-Proyek Bank Sampah Digital
+#Proyek Bank Sampah Digital
 
 Proyek ini adalah aplikasi web "Bank Sampah Digital & Daur Ulang" yang dibangun menggunakan Flask, berdasarkan proposal yang telah disusun.
 
