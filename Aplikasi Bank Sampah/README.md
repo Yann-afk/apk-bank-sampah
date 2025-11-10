@@ -1,3 +1,4 @@
+
 Proyek Bank Sampah Digital
 
 Proyek ini adalah aplikasi web "Bank Sampah Digital & Daur Ulang" yang dibangun menggunakan Flask, berdasarkan proposal yang telah disusun.
@@ -59,19 +60,22 @@ Cara Menjalankan
 
 2. Buat virtual environment (direkomendasikan):
 
+```
 python -m venv venv
 source venv/bin/activate  # Di Windows: venv\Scripts\activate
-
+```
 
 3. Instal dependensi yang diperlukan:
 
+```
 pip install Flask flask-login werkzeug
-
+```
 
 4. Jalankan aplikasi:
 
+```
 python run.py
-
+```
 
 5. Buka aplikasi di browser:
 Akses http://127.0.0.1:5000
@@ -83,3 +87,4 @@ Akun Contoh (dari database.json)
 - Pengepul: pengepul@example.com (password: pengepul123)
 
 - Pengguna: pengguna@example.com (password: pengguna123)
+```
