@@ -3,7 +3,7 @@
 
 Proyek ini adalah aplikasi web "Bank Sampah Digital & Daur Ulang" yang dibangun menggunakan Flask, berdasarkan proposal yang telah disusun.
 
-Fitur Utama
+## Fitur Utama
 
 - 3 Peran Pengguna: Pengguna (Rumah Tangga), Pengepul, dan Admin.
 
@@ -15,7 +15,7 @@ Fitur Utama
 
 - Panel Admin: Admin dapat mengelola pengguna, data master (jenis sampah, reward), dan memonitor transaksi.
 
-Arsitektur
+## Arsitektur
 
 Aplikasi ini menerapkan Layered Architecture:
 
@@ -25,7 +25,7 @@ Aplikasi ini menerapkan Layered Architecture:
 
 3. Data Access Layer (repository.py): Bertanggung jawab untuk membaca dan menulis data dari/ke sumber data (database.json).
 
-Struktur Proyek
+## Struktur Proyek
 
 ```
 proyek_bank_sampah/
@@ -55,7 +55,7 @@ proyek_bank_sampah/
 └── run.py
 ```
 
-Cara Menjalankan
+## Cara Menjalankan
 
 1. Pastikan Python 3 terinstal.
 
@@ -91,4 +91,3 @@ Akun Contoh (dari database.json)
 
 cat: untuk menambahkan akun, kalian hanya perlu registrasi akun
 
-```
