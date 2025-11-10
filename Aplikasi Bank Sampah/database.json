@@ -1,0 +1,80 @@
+{
+  "users": {
+    "1a794706-0976-473d-905a-c1a396263e69": {
+      "id": "1a794706-0976-473d-905a-c1a396263e69",
+      "nama": "Admin Bank Sampah",
+      "email": "admin@banksampah.com",
+      "password": "admin123",
+      "role": "admin",
+      "alamat": "Kantor Pusat",
+      "totalPoin": 0
+    },
+    "2b8f6c3a-3c1a-4f5e-8b1e-2e3f6a8b1c4d": {
+      "id": "2b8f6c3a-3c1a-4f5e-8b1e-2e3f6a8b1c4d",
+      "nama": "Budi Santoso",
+      "email": "budi@pengguna.com",
+      "password": "budi123",
+      "role": "pengguna",
+      "alamat": "Jl. Merdeka No. 12, Depok",
+      "totalPoin": 8750
+    },
+    "3c9a1d5b-4b2e-4c6f-8a2d-4e5f7a1b3c6e": {
+      "id": "3c9a1d5b-4b2e-4c6f-8a2d-4e5f7a1b3c6e",
+      "nama": "Rina Amelia",
+      "email": "rina@pengepul.com",
+      "password": "rina123",
+      "role": "pengepul",
+      "alamat": "Gg. Damai Blok B2 No. 5",
+      "totalPoin": 0
+    }
+  },
+  "sampah": {
+    "s001": {
+      "id": "s001",
+      "nama": "Botol Plastik (PET)",
+      "nilaiPoinPerKg": 500
+    },
+    "s002": {
+      "id": "s002",
+      "nama": "Kardus",
+      "nilaiPoinPerKg": 300
+    },
+    "s003": {
+      "id": "s003",
+      "nama": "Kaleng Aluminium",
+      "nilaiPoinPerKg": 1000
+    }
+  },
+  "rewards": {
+    "r001": {
+      "id": "r001",
+      "nama": "Voucher Pulsa 10k",
+      "deskripsi": "Tukar poin dengan voucher pulsa 10.000",
+      "poinDibutuhkan": 10000,
+      "gambar": "https://www.google.com/search?q=https://placehold.co/600x400/a7f3d0/333333%3Ftext%3DPulsa%2B10k"
+    },
+    "r002": {
+      "id": "r002",
+      "nama": "Minyak Goreng 1L",
+      "deskripsi": "Tukar poin dengan 1 Liter minyak goreng kemasan.",
+      "poinDibutuhkan": 15000,
+      "gambar": "https://www.google.com/search?q=https://placehold.co/600x400/a7f3d0/333333%3Ftext%3DMinyak%2B1L"
+    },
+    "r003": {
+      "id": "r003",
+      "nama": "Token Listrik 20k",
+      "deskripsi": "Tukar poin dengan token listrik PLN senilai 20.000",
+      "poinDibutuhkan": 20000,
+      "gambar": "https://www.google.com/search?q=https://placehold.co/600x400/a7f3d0/333333%3Ftext%3DToken%2B20k"
+    },
+    "r004": {
+      "id": "r004",
+      "nama": "Paket Sembako A",
+      "deskripsi": "Beras 5kg, Gula 1kg, Minyak 1L",
+      "poinDibutuhkan": 75000,
+      "gambar": "https://www.google.com/search?q=https://placehold.co/600x400/a7f3d0/333333%3Ftext%3DSembako%2BA"
+    }
+  },
+  "pickups": {},
+  "transactions": {}
+}

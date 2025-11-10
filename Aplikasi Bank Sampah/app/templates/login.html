@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Bank Sampah Digital{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-center pt-12">
+    <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg border border-gray-200">
+        <h2 class="text-3xl font-bold text-center text-gray-900">
+            Masuk
+        </h2>
+        <p class="text-center text-gray-600">
+            Selamat datang kembali! Silakan masuk ke akun Anda.
+        </p>
+        
+        <!-- Form Login (sesuai image_2154ae.png) -->
+        <form method="POST" class="space-y-6">
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700">
+                    Alamat Email
+                </label>
+                <div class="mt-1">
+                    <input id="email" name="email" type="email" autocomplete="email" required
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                           placeholder="anda@email.com">
+                </div>
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700">
+                    Kata Sandi
+                </label>
+                <div class="mt-1">
+                    <input id="password" name="password" type="password" autocomplete="current-password" required
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                           placeholder="••••••••">
+                </div>
+            </div>
+
+            <!-- (Placeholder Lupa Kata Sandi) -->
+            <div class="text-sm text-right">
+                <a href="#" class="font-medium text-green-600 hover:text-green-500">
+                    Lupa kata sandi?
+                </a>
+            </div>
+
+            <div>
+                <button type
+="submit"
+                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
+                    Masuk
+                </button>
+            </div>
+        </form>
+        
+        <p class="text-sm text-center text-gray-600">
+            Belum punya akun?
+            <a href="{{ url_for('auth.register') }}" class="font-medium text-green-600 hover:text-green-500">
+                Daftar di sini
+            </a>
+        </p>
+    </div>
+</div>
+{% endblock %}
