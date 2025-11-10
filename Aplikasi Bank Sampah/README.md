@@ -36,18 +36,18 @@ proyek_bank_sampah/
 │ ├── routes.py
 │ ├── services.py
 │ └── templates/
-│ ├── base.html
-│ ├── dashboard_admin.html
-│ ├── dashboard_pengepul.html
-│ ├── dashboard_pengguna.html
-│ ├── login.html
-│ ├── map_placeholder.html
-│ ├── pickup_form.html
-│ ├── register.html
-│ ├── reward_catalog.html
-│ ├── admin_manage_users.html
-│ ├── admin_manage_master_data.html
-│ └── admin_monitor_transactions.html
+│     ├── base.html
+│     ├── dashboard_admin.html
+│     ├── dashboard_pengepul.html
+│     ├── dashboard_pengguna.html
+│     ├── login.html
+│     ├── map_placeholder.html
+│     ├── pickup_form.html
+│     ├── register.html
+│     ├── reward_catalog.html
+│     ├── admin_manage_users.html
+│     ├── admin_manage_master_data.html
+│     └── admin_monitor_transactions.html
 │
 ├── database.json
 ├── README.md
