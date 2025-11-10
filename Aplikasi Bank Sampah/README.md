@@ -27,6 +27,7 @@ Aplikasi ini menerapkan Layered Architecture:
 
 Struktur Proyek
 
+```
 proyek_bank_sampah/
 ├── app/
 │ ├── __init__.py
@@ -52,7 +53,7 @@ proyek_bank_sampah/
 ├── README.md
 ├── README_UseCase.md
 └── run.py
-
+```
 
 Cara Menjalankan
 
