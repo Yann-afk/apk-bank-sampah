@@ -3,96 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Bank Sampah Digital{% endblock %}</title>
+    <!-- Judul Halaman Dinamis -->
+    <title>{% block title %}Bank Sampah Digital{% endblock %} - Bank Sampah</title>
+    <!-- Memuat Tailwind CSS dari CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom styling untuk font, dll */
+        /* Font kustom (Inter) seperti di proposal */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-
-            /* === TAMBAHAN UNTUK BACKGROUND === */
-            /* Pastikan 'background 1.jpg' ada di folder 'static' Anda */
-            background-image: url("{{ url_for('static', filename='background 1.jpg') }}");
-            background-size: cover; /* Membuat gambar menutupi seluruh area */
-            background-position: center center; /* Memusatkan gambar */
-            background-repeat: no-repeat; /* Mencegah gambar berulang */
-            background-attachment: scroll; /* Membuat background tetap saat di-scroll */
-            /* ================================== */
-        }
-        /* Icon untuk menu dasbor (jika tidak menggunakan SVG inline) */
-        .menu-icon {
-            width: 48px;
-            height: 48px;
-            margin-bottom: 0.5rem;
         }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col">
+<body class="bg-gray-100">
 
-    <nav class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex-shrink-0">
-                    <a class="text-2xl font-bold text-green-600" href="{{ url_for('main.index') }}">
-                        Bank Sampah
-                    </a>
-                </div>
-                
-                <div class="flex items-center space-x-4">
-                    {% if current_user.is_authenticated %}
-                        <div class="text-right">
-                            <div class="font-medium text-gray-800">{{ current_user.nama }}</div>
-                            {% if current_user.is_pengguna %}
-                                <div class="text-sm text-green-600 font-semibold">{{ current_user.totalPoin }} Poin</div>
-                            {% else %}
-                                <div class="text-sm text-gray-500 capitalize">{{ current_user.role }}</div>
-                            {% endif %}
+    <div class="min-h-screen">
+        <!-- Navigasi (hanya tampil jika pengguna sudah login) -->
+        {% if current_user.is_authenticated %}
+        <nav class="bg-white shadow-md">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex">
+                        <div class="flex-shrink-0 flex items-center">
+                            <span class="text-2xl font-bold text-green-600">BankSampah</span>
                         </div>
-                        <a href="{{ url_for('auth.logout') }}" 
-                           class="px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-sm text-gray-700 mr-4">
+                            Halo, <strong class="font-medium">{{ current_user.nama }}</strong> 
+                            (<span class="italic">{{ current_user.role }}</span>)
+                        </span>
+                        <a href="{{ url_for('auth.logout') }}" class="py-2 px-3 bg-red-500 text-white text-sm font-medium rounded-md hover:bg-red-600 transition duration-150">
                             Logout
                         </a>
-                    {% else %}
-                        <a href="{{ url_for('auth.login') }}" class="px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100">
-                            Masuk
-                        </a>
-                        <a href="{{ url_for('auth.register') }}" class="px-3 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors">
-                            Daftar
-                        </a>
-                    {% endif %}
+                    </div>
                 </div>
             </div>
-        </div>
-    </nav>
+        </nav>
+        {% endif %}
 
-    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
-        
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="mb-6 space-y-3">
-                {% for category, message in messages %}
-                    {% set bg_color = 'bg-blue-100 border-blue-500 text-blue-700' %} {% if category == 'success' %}
-                        {% set bg_color = 'bg-green-100 border-green-500 text-green-700' %}
-                    {% elif category == 'error' %}
-                        {% set bg_color = 'bg-red-100 border-red-500 text-red-700' %}
-                    {% endif %}
-                    <div class="{{ bg_color }} border-l-4 p-4 rounded-md shadow-sm" role="alert">
-                        <p class="font-bold capitalize">{{ category }}</p>
-                        <p>{{ message }}</p>
+        <!-- Konten Utama -->
+        <main>
+            <!-- Blok untuk flash messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+                    {% for category, message in messages %}
+                    <div class="px-4 py-3 rounded-md 
+                        {% if category == 'success' %} bg-green-100 text-green-800
+                        {% elif category == 'danger' %} bg-red-100 text-red-800
+                        {% elif category == 'warning' %} bg-yellow-100 text-yellow-800
+                        {% else %} bg-blue-100 text-blue-800
+                        {% endif %}"
+                         role="alert">
+                        <span class="font-medium">{{ message }}</span>
                     </div>
-                {% endfor %}
+                    {% endfor %}
                 </div>
-            {% endif %}
-        {% endwith %}
+                {% endif %}
+            {% endwith %}
 
-        {% block content %}{% endblock %}
-    </main>
-
-    <footer class="bg-white mt-12 py-6 border-t border-gray-200">
-        <div class="container mx-auto px-6 text-center text-gray-500 text-sm">
-            &copy; 2025 Bank Sampah Digital. Dibuat dengan Flask & Tailwind CSS.
-        </div>
-    </footer>
+            <!-- Blok Konten Halaman -->
+            {% block content %}{% endblock %}
+        </main>
+    </div>
 
 </body>
 </html>

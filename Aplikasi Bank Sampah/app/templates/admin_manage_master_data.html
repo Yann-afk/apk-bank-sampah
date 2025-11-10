@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Manajemen Data Master{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <a href="{{ url_for('main.dashboard') }}" class="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 mb-4">
+        <svg class="h-5 w-5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+        Kembali ke Dasbor Admin
+    </a>
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">Manajemen Data Master</h1>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- Kolom Kiri: Kelola Jenis Sampah -->
+        <div class="bg-white p-8 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Kelola Jenis Sampah</h2>
+            
+            <!-- Form Tambah Jenis Sampah -->
+            <form method="POST" action="{{ url_for('main.admin_manage_master_data') }}" class="space-y-4 mb-8 pb-8 border-b">
+                <input type="hidden" name="form_type" value="waste_type">
+                <div>
+                    <label for="waste_nama" class="block text-sm font-medium text-gray-700 mb-1">Nama Jenis Sampah</label>
+                    <input type="text" id="waste_nama" name="waste_nama"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                           placeholder="Cth: Botol Plastik PET" required>
+                </div>
+                <div>
+                    <label for="waste_poin" class="block text-sm font-medium text-gray-700 mb-1">Nilai Poin (per Kg)</label>
+                    <input type="number" id="waste_poin" name="waste_poin"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                           placeholder="Cth: 200" required>
+                </div>
+                <button type="submit" class="w-full py-3 px-4 bg-green-600 text-white font-medium rounded-lg shadow hover:bg-green-700">
+                    + Tambah Jenis Sampah
+                </button>
+            </form>
+            
+            <!-- Daftar Jenis Sampah -->
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Daftar Jenis Sampah Saat Ini</h3>
+            <ul class="divide-y divide-gray-200">
+                {% for waste in waste_types %}
+                <li class="py-3 flex justify-between items-center">
+                    <div>
+                        <p class="font-medium text-gray-900">{{ waste.nama }}</p>
+                        <p class="text-sm text-gray-500">{{ waste.nilai_poin_per_kg }} poin/kg</p>
+                    </div>
+                    <!-- TODO: Tambahkan tombol Edit/Hapus -->
+                </li>
+                {% else %}
+                <li class="py-3 text-gray-500">Belum ada data.</li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <!-- Kolom Kanan: Kelola Reward -->
+        <div class="bg-white p-8 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Kelola Reward</h2>
+            
+            <!-- Form Tambah Reward -->
+            <form method="POST" action="{{ url_for('main.admin_manage_master_data') }}" class="space-y-4 mb-8 pb-8 border-b">
+                <input type="hidden" name="form_type" value="reward">
+                <div>
+                    <label for="reward_nama" class="block text-sm font-medium text-gray-700 mb-1">Nama Reward</label>
+                    <input type="text" id="reward_nama" name="reward_nama"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                           placeholder="Cth: Voucher Pulsa 5rb" required>
+                </div>
+                <div>
+                    <label for="reward_deskripsi" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
+                    <textarea id="reward_deskripsi" name="reward_deskripsi" rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                              placeholder="Deskripsi singkat reward..."></textarea>
+                </div>
+                <div>
+                    <label for="reward_poin" class="block text-sm font-medium text-gray-700 mb-1">Poin Dibutuhkan</label>
+                    <input type="number" id="reward_poin" name="reward_poin"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                           placeholder="Cth: 5000" required>
+                </div>
+                <button type="submit" class="w-full py-3 px-4 bg-green-600 text-white font-medium rounded-lg shadow hover:bg-green-700">
+                    + Tambah Reward
+                </button>
+            </form>
+            
+            <!-- Daftar Reward -->
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Daftar Reward Saat Ini</h3>
+            <ul class="divide-y divide-gray-200">
+                {% for reward in rewards %}
+                <li class="py-3 flex justify-between items-center">
+                    <div>
+                        <p class="font-medium text-gray-900">{{ reward.nama }}</p>
+                        <p class="text-sm text-gray-500">{{ reward.poin_dibutuhkan }} poin</p>
+                    </div>
+                    <!-- TODO: Tambahkan tombol Edit/Hapus -->
+                </li>
+                {% else %}
+                <li class="py-3 text-gray-500">Belum ada data.</li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

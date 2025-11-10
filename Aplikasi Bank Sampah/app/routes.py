@@ -1,174 +1,216 @@
-from flask import (Blueprint, render_template, request, redirect, url_for, flash, abort
-)
+from flask import Blueprint, render_template, redirect, url_for, flash, request, abort
 from flask_login import login_required, current_user
-from .auth import role_required
-from datetime import date  # <--- TAMBAHKAN BARIS INI
+from app.auth import role_required
+from app.services import PenggunaService, PengepulService, AdminService
 
-from . import service, repo
+# Membuat Blueprint utama untuk aplikasi
+main_bp = Blueprint('main', __name__)
 
-
-# --- Blueprint ---
-main_bp = Blueprint('main', __name__, url_prefix='/')
-
+# Inisialisasi services
+user_service = PenggunaService()
+collector_service = PengepulService()
+admin_service = AdminService()
 
 # --- Rute Utama dan Dasbor ---
 
 @main_bp.route('/')
 def index():
-    """Halaman utama, redirect ke dasbor jika sudah login"""
-    if not current_user.is_authenticated:
-        return redirect(url_for('auth.login'))
+    """
+    Halaman utama. Jika sudah login, alihkan ke dasbor.
+    Jika belum, alihkan ke halaman login.
+    """
+    if current_user.is_authenticated:
+        return redirect(url_for('main.dashboard'))
+    return redirect(url_for('auth.login'))
+
+@main_bp.route('/dashboard')
+@login_required
+def dashboard():
+    """
+    Dasbor dinamis berdasarkan peran pengguna.
+    """
+    # Mengarahkan pengguna ke template dasbor yang sesuai dengan perannya
+    if current_user.is_role('pengguna'):
+        data = user_service.get_user_dashboard_data(current_user.id)
+        return render_template('dashboard_pengguna.html', title="Dasbor Pengguna", data=data)
         
-    if current_user.is_admin:
-        return redirect(url_for('main.dashboard_admin'))
-    elif current_user.is_pengepul:
-        return redirect(url_for('main.dashboard_pengepul'))
+    elif current_user.is_role('pengepul'):
+        tasks = collector_service.get_collector_tasks(current_user.id)
+        return render_template('dashboard_pengepul.html', title="Dasbor Pengepul", tasks=tasks)
+        
+    elif current_user.is_role('admin'):
+        return render_template('dashboard_admin.html', title="Dasbor Admin")
+        
     else:
-        return redirect(url_for('main.dashboard_pengguna'))
+        # Jika peran tidak dikenali, logout saja
+        return redirect(url_for('auth.logout'))
 
-@main_bp.route('/dashboard/pengguna')
+# --- Rute untuk PENGGUNA ---
+
+@main_bp.route('/schedule_pickup', methods=['GET', 'POST'])
 @login_required
 @role_required('pengguna')
-def dashboard_pengguna():
-    """Dasbor untuk Pengguna (User), sesuai screenshot"""
-    # Ambil data riwayat transaksi
-    transactions = repo.get_transactions_by_user(current_user.id)
-    return render_template(
-        'dashboard_pengguna.html', 
-        user=current_user,
-        transactions=transactions
-    )
-
-@main_bp.route('/dashboard/pengepul')
-@login_required
-@role_required('pengepul')
-def dashboard_pengepul():
-    """Dasbor untuk Pengepul"""
-    # Ambil tugas (pickup yang masih 'diminta')
-    tasks = repo.get_pickups_by_status('diminta')
-    # Ambil daftar jenis sampah untuk form input
-    sampah_types = repo.get_sampah_types()
-    
-    tasks_with_user = []
-    for task in tasks:
-        user = repo.get_user_by_id(task['userId'])
-        task['namaPengguna'] = user['nama'] if user else 'Pengguna Dihapus'
-        tasks_with_user.append(task)
-        
-    return render_template(
-        'dashboard_pengepul.html', 
-        tasks=tasks_with_user, 
-        sampah_types=sampah_types
-    )
-
-@main_bp.route('/dashboard/admin')
-@login_required
-@role_required('admin')
-def dashboard_admin():
-    """Dasbor untuk Admin"""
-    users = repo.get_all_users()
-    rewards = repo.get_rewards()
-    sampah_types = repo.get_sampah_types()
-    
-    return render_template(
-        'dashboard_admin.html',
-        all_users=users,
-        all_rewards=rewards,
-        all_sampah=sampah_types
-    )
-
-# --- Rute Fitur Pengguna ---
-
-@main_bp.route('/pickup/new', methods=('GET', 'POST'))
-@login_required
-@role_required('pengguna')
-def new_pickup():
+def schedule_pickup():
+    """
+    Halaman form untuk pengguna menjadwalkan penjemputan.
+    """
     if request.method == 'POST':
-        tanggal = request.form['tanggal']
-        waktu = request.form['waktu']
-        lokasi = request.form.get('lokasi', current_user.alamat)
-        try:
-            service.schedule_pickup(
-            user_id=current_user.id,
-            tanggal=tanggal,
-            waktu=waktu,
-            lokasi=lokasi
-            )
-            flash('Penjemputan berhasil dijadwalkan!', 'success')
-            return redirect(url_for('main.dashboard_pengguna'))
-        except Exception as e:
-            flash(f'Terjadi kesalahan: {e}', 'error')
+        tanggal = request.form.get('tanggal')
+        waktu = request.form.get('waktu')
+        # Ambil alamat dari data pengguna yang login
+        lokasi = current_user.data.get('alamat', 'Alamat tidak diatur') 
+        notes = request.form.get('notes')
+        
+        saved_pickup, message = user_service.schedule_pickup(
+            current_user.id, tanggal, waktu, lokasi, notes
+        )
+        
+        if saved_pickup:
+            flash(message, 'success')
+            return redirect(url_for('main.dashboard'))
+        else:
+            flash(message, 'danger')
+            
+    return render_template('pickup_form.html', title="Jadwalkan Penjemputan")
 
-    today = date.today()
-    today_string = today.strftime('%Y-%m-%d')
-    return render_template('pickup_form.html', default_tanggal=today_string)
 @main_bp.route('/rewards')
 @login_required
 @role_required('pengguna')
 def reward_catalog():
-    """Menampilkan katalog reward, sesuai screenshot"""
-    rewards = repo.get_rewards()
-    # Mengambil data user terbaru (terutama totalPoin)
-    user_data = repo.get_user_by_id(current_user.id)
-    user_poin = user_data.get('totalPoin', 0)
-    
-    return render_template(
-        'reward_catalog.html', 
-        rewards=rewards, 
-        user_poin=user_poin
-    )
+    """
+    Menampilkan katalog reward yang bisa ditukar.
+    """
+    rewards = user_service.get_rewards_catalog()
+    return render_template('reward_catalog.html', title="Katalog Reward", rewards=rewards)
 
-@main_bp.route('/rewards/redeem/<string:reward_id>', methods=('POST',))
+@main_bp.route('/redeem_reward/<string:reward_id>', methods=['POST'])
 @login_required
 @role_required('pengguna')
 def redeem_reward(reward_id):
-    """Memproses permintaan penukaran reward"""
-    try:
-        success, message = service.redeem_reward(current_user.id, reward_id)
-        if success:
+    """
+    Rute untuk memproses permintaan penukaran reward.
+    """
+    # Hanya izinkan metode POST
+    if request.method == 'POST':
+        ok, message = user_service.redeem_reward(current_user.id, reward_id)
+        
+        if ok:
             flash(message, 'success')
         else:
-            flash(message, 'error')
-    except Exception as e:
-        flash(f'Terjadi kesalahan: {e}', 'error')
-        
+            flash(message, 'danger')
+            
+    # Kembali ke katalog reward
     return redirect(url_for('main.reward_catalog'))
 
 @main_bp.route('/map')
 @login_required
 def map_placeholder():
-    """Halaman placeholder untuk fitur Peta Bank Sampah"""
-    return render_template('map_placeholder.html')
+    """
+    Halaman placeholder untuk peta bank sampah.
+    """
+    return render_template('map_placeholder.html', title="Peta Bank Sampah")
 
-# --- Rute Fitur Pengepul ---
+# --- Rute untuk PENGEPUL ---
 
-@main_bp.route('/pickup/confirm/<string:pickup_id>', methods=('POST',))
+@main_bp.route('/confirm_pickup/<string:pickup_id>', methods=['GET', 'POST'])
 @login_required
 @role_required('pengepul')
 def confirm_pickup(pickup_id):
-    """Memproses konfirmasi pickup dan input sampah oleh pengepul"""
-    
-    waste_details = {}
-    for key, value in request.form.items():
-        if key.startswith('kg-'):
-            sampah_id = key.split('-')[1]
-            if value:
-                waste_details[sampah_id] = value
-                
-    if not waste_details:
-        flash('Input berat sampah tidak boleh kosong.', 'error')
-        return redirect(url_for('main.dashboard_pengepul'))
+    """
+    Halaman form untuk pengepul mengonfirmasi penjemputan
+    dan menginput berat sampah.
+    """
+    if request.method == 'POST':
+        # Mengambil data sampah dari form
+        waste_inputs = []
+        # Form akan mengirimkan data seperti 'waste_id_wt1' dan 'waste_weight_wt1'
+        for key in request.form:
+            if key.startswith('waste_weight_'):
+                waste_type_id = key.split('waste_weight_')[-1]
+                weight = request.form.get(key)
+                if weight and float(weight) > 0:
+                    waste_inputs.append({
+                        "waste_type_id": waste_type_id,
+                        "weight": weight
+                    })
 
-    try:
-        tx = service.confirm_pickup(
-            pickup_id=pickup_id,
-            pengepul_id=current_user.id,
-            waste_details=waste_details
+        if not waste_inputs:
+            flash("Anda harus menginput setidaknya satu jenis sampah.", 'warning')
+            return redirect(request.url)
+
+        _, message = collector_service.confirm_pickup_and_calculate_points(
+            pickup_id, current_user.id, waste_inputs
         )
-        flash(f"Pickup berhasil dikonfirmasi! {tx['totalPoin']} poin ditambahkan ke pengguna.", 'success')
-    except ValueError as e:
-        flash(f'Gagal konfirmasi: {e}', 'error')
-    except Exception as e:
-        flash(f'Terjadi kesalahan sistem: {e}', 'error')
+        
+        flash(message, 'success')
+        return redirect(url_for('main.dashboard'))
 
-    return redirect(url_for('main.dashboard_pengepul'))
+    # Untuk metode GET
+    waste_types = collector_service.get_waste_types_for_confirmation()
+    return render_template('pickup_confirmation_form.html', # Template baru
+                           title="Konfirmasi Setoran",
+                           pickup_id=pickup_id,
+                           waste_types=waste_types)
+
+
+# --- Rute untuk ADMIN ---
+
+@main_bp.route('/admin/users')
+@login_required
+@role_required('admin')
+def admin_manage_users():
+    """
+    Halaman admin untuk mengelola pengguna.
+    """
+    users = admin_service.get_all_user_accounts()
+    return render_template('admin_manage_users.html', title="Manajemen Pengguna", users=users)
+
+@main_bp.route('/admin/master_data', methods=['GET', 'POST'])
+@login_required
+@role_required('admin')
+def admin_manage_master_data():
+    """
+    Halaman admin untuk mengelola data master (Jenis Sampah & Reward).
+    """
+    if request.method == 'POST':
+        form_type = request.form.get('form_type')
+        if form_type == 'waste_type':
+            nama = request.form.get('waste_nama')
+            poin = request.form.get('waste_poin')
+            ok, message = admin_service.add_new_waste_type(nama, poin)
+        
+        elif form_type == 'reward':
+            nama = request.form.get('reward_nama')
+            deskripsi = request.form.get('reward_deskripsi')
+            poin = request.form.get('reward_poin')
+            ok, message = admin_service.add_new_reward(nama, deskripsi, poin)
+        
+        if ok:
+            flash(message, 'success')
+        else:
+            flash(message, 'danger')
+        
+        return redirect(url_for('main.admin_manage_master_data'))
+
+    # Untuk metode GET
+    data = admin_service.get_master_data()
+    return render_template(
+        'admin_manage_master_data.html',
+        title="Manajemen Data Master",
+        waste_types=data['waste_types'],
+        rewards=data['rewards']
+    )
+
+@main_bp.route('/admin/transactions')
+@login_required
+@role_required('admin')
+def admin_monitor_transactions():
+    """
+    Halaman admin untuk memonitor semua transaksi.
+    """
+    transactions = admin_service.get_all_transactions()
+    return render_template(
+        'admin_monitor_transactions.html',
+        title="Monitor Transaksi",
+        transactions=transactions
+    )

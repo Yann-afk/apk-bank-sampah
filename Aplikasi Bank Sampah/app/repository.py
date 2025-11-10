@@ -1,158 +1,229 @@
 import json
 import os
-import threading
+import uuid # Untuk generate ID unik
 
-class JsonRepository:
+# Menentukan path ke file database JSON
+# Menggunakan os.path untuk membuatnya kompatibel antar sistem operasi
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_FILE = os.path.join(BASE_DIR, '..', 'database.json')
+
+# PENTING: Dalam aplikasi nyata, menggunakan file JSON tunggal untuk database
+# akan menyebabkan masalah besar (race conditions, performa buruk).
+# Ini hanya untuk tujuan demo sesuai permintaan.
+# Di produksi, gunakan database seperti PostgreSQL, MySQL, atau Firestore.
+
+class BaseRepository:
     """
-    Data Access Layer (DAL) untuk mengelola data dalam file JSON.
-    Semua operasi baca/tulis ke database.json HARUS melalui kelas ini.
+    Kelas dasar untuk repositori yang menangani pembacaan dan penulisan
+    ke file database JSON.
     """
-    _lock = threading.Lock() # Lock untuk menangani file I/O yang thread-safe
+    def _load_data(self):
+        """
+        Metode internal untuk membaca seluruh data dari database.json.
+        """
+        try:
+            with open(DB_FILE, 'r') as f:
+                return json.load(f)
+        except FileNotFoundError:
+            # Jika file tidak ada, kembalikan struktur data kosong
+            return {"users": {}, "waste_types": {}, "rewards": {}, "pickups": {}, "transactions": {}}
+        except json.JSONDecodeError:
+            # Jika file korup, kembalikan struktur data kosong
+            return {"users": {}, "waste_types": {}, "rewards": {}, "pickups": {}, "transactions": {}}
 
-    def __init__(self, db_path):
-        if not os.path.exists(db_path):
-            raise FileNotFoundError(f"File database tidak ditemukan di: {db_path}")
-        self.db_path = db_path
+    def _save_data(self, data):
+        """
+        Metode internal untuk menulis seluruh data kembali ke database.json.
+        """
+        try:
+            with open(DB_FILE, 'w') as f:
+                json.dump(data, f, indent=2)
+        except IOError as e:
+            # Menangani error jika tidak bisa menulis file
+            print(f"Error saving data: {e}")
 
-    def _read_db(self):
-        """Membaca seluruh data dari file JSON dengan thread-safe."""
-        with self._lock:
-            try:
-                with open(self.db_path, 'r') as f:
-                    # Periksa apakah file kosong
-                    content = f.read()
-                    if not content:
-                        return self._get_empty_db_structure()
-                    return json.loads(content)
-            except (IOError, json.JSONDecodeError) as e:
-                print(f"Error reading DB: {e}. Returning empty structure.")
-                return self._get_empty_db_structure()
-                
-    def _get_empty_db_structure(self):
-        """Mengembalikan struktur DB kosong jika file rusak atau kosong."""
-        return {
-            "users": {},
-            "sampah": {},
-            "rewards": {},
-            "pickups": {},
-            "transactions": {}
-        }
-
-    def _write_db(self, data):
-        """Menulis seluruh data ke file JSON dengan thread-safe."""
-        with self._lock:
-            try:
-                with open(self.db_path, 'w') as f:
-                    json.dump(data, f, indent=2)
-            except IOError as e:
-                print(f"Error writing to DB: {e}")
-
-    # --- User Methods ---
-    
+class UserRepository(BaseRepository):
+    """
+    Repositori untuk mengelola data pengguna (users).
+    """
     def get_all_users(self):
-        data = self._read_db()
+        data = self._load_data()
         return list(data.get('users', {}).values())
 
     def get_user_by_id(self, user_id):
-        data = self._read_db()
+        data = self._load_data()
         return data.get('users', {}).get(user_id)
 
     def get_user_by_email(self, email):
-        data = self._read_db()
+        data = self._load_data()
         for user in data.get('users', {}).values():
             if user['email'] == email:
                 return user
         return None
 
-    def add_user(self, user_data):
-        data = self._read_db()
-        if user_data['id'] in data['users']:
-            raise ValueError("User ID sudah ada")
+    def save_user(self, user_data):
+        data = self._load_data()
+        
+        # Jika 'id' belum ada, buat ID baru
+        if 'id' not in user_data or not user_data['id']:
+            user_data['id'] = f"u{uuid.uuid4().hex[:6]}" # ID unik singkat
+        
+        if 'users' not in data:
+            data['users'] = {}
+            
         data['users'][user_data['id']] = user_data
-        self._write_db(data)
+        self._save_data(data)
         return user_data
-        
-    def update_user(self, user_id, updates):
-        data = self._read_db()
-        if user_id not in data['users']:
-            return None
-        data['users'][user_id].update(updates)
-        self._write_db(data)
-        return data['users'][user_id]
 
-    # --- Sampah (Waste) Methods ---
-    
-    def get_sampah_types(self):
-        data = self._read_db()
-        return list(data.get('sampah', {}).values())
-        
-    def get_sampah_by_id(self, sampah_id):
-        data = self._read_db()
-        return data.get('sampah', {}).get(sampah_id)
+class DataRepository(BaseRepository):
+    """
+    Repositori untuk mengelola data master (sampah, reward)
+    dan data transaksional (penjemputan, transaksi).
+    """
 
-    # --- Reward Methods ---
+    # --- Master Data ---
     
-    def get_rewards(self):
-        data = self._read_db()
+    def get_all_waste_types(self):
+        data = self._load_data()
+        return list(data.get('waste_types', {}).values())
+
+    def get_all_rewards(self):
+        data = self._load_data()
         return list(data.get('rewards', {}).values())
-        
+
+    def save_waste_type(self, waste_data):
+        data = self._load_data()
+        if 'id' not in waste_data:
+            waste_data['id'] = f"wt{uuid.uuid4().hex[:4]}"
+        if 'waste_types' not in data:
+            data['waste_types'] = {}
+        data['waste_types'][waste_data['id']] = waste_data
+        self._save_data(data)
+        return waste_data
+
+    def save_reward(self, reward_data):
+        data = self._load_data()
+        if 'id' not in reward_data:
+            reward_data['id'] = f"r{uuid.uuid4().hex[:4]}"
+        if 'rewards' not in data:
+            data['rewards'] = {}
+        data['rewards'][reward_data['id']] = reward_data
+        self._save_data(data)
+        return reward_data
+
     def get_reward_by_id(self, reward_id):
-        data = self._read_db()
+        """Mengambil data reward tunggal berdasarkan ID."""
+        data = self._load_data()
         return data.get('rewards', {}).get(reward_id)
 
-    # --- Pickup Methods ---
-    
-    def get_pickups_by_user(self, user_id):
-        data = self._read_db()
-        pickups = []
-        for pickup in data.get('pickups', {}).values():
-            if pickup['userId'] == user_id:
-                pickups.append(pickup)
-        # Urutkan berdasarkan tanggal, terbaru dulu
-        return sorted(pickups, key=lambda p: p['tanggal'], reverse=True)
-        
-    def get_pickups_by_status(self, status):
-        data = self._read_db()
-        pickups = []
-        for pickup in data.get('pickups', {}).values():
-            if pickup['status'] == status:
-                pickups.append(pickup)
-        return sorted(pickups, key=lambda p: p['tanggal'])
+    # --- Transactional Data ---
 
-    def get_pickup_by_id(self, pickup_id):
-        data = self._read_db()
-        return data.get('pickups', {}).get(pickup_id)
+    def get_all_pickups(self):
+        data = self._load_data()
+        return list(data.get('pickups', {}).values())
+
+    def get_pickups_by_user_id(self, user_id):
+        data = self._load_data()
+        pickups = []
+        for pickup in data.get('pickups', {}).values():
+            if pickup['user_id'] == user_id:
+                pickups.append(pickup)
+        return pickups
+
+    def get_pickups_by_collector_id(self, collector_id):
+        data = self._load_data()
+        tasks = []
+        for pickup in data.get('pickups', {}).values():
+            # Menampilkan tugas yang ditugaskan atau yang masih 'menunggu'
+            if pickup.get('pengepul_id') == collector_id or pickup['status'] == 'menunggu':
+                tasks.append(pickup)
+        return tasks
         
-    def add_pickup(self, pickup_data):
-        data = self._read_db()
-        if pickup_data['id'] in data['pickups']:
-            raise ValueError("Pickup ID sudah ada")
+    def get_pickup_by_id(self, pickup_id):
+        data = self._load_data()
+        return data.get('pickups', {}).get(pickup_id)
+
+    def save_pickup(self, pickup_data):
+        data = self._load_data()
+        if 'id' not in pickup_data:
+            pickup_data['id'] = f"p{uuid.uuid4().hex[:6]}"
+        if 'pickups' not in data:
+            data['pickups'] = {}
         data['pickups'][pickup_data['id']] = pickup_data
-        self._write_db(data)
+        self._save_data(data)
         return pickup_data
 
-    def update_pickup(self, pickup_id, updates):
-        data = self._read_db()
-        if pickup_id not in data['pickups']:
-            return None
-        data['pickups'][pickup_id].update(updates)
-        self._write_db(data)
-        return data['pickups'][pickup_id]
+    def get_all_transactions(self):
+        data = self._load_data()
+        return list(data.get('transactions', {}).values())
 
-    # --- Transaction Methods ---
+    def save_transaction(self, trans_data):
+        data = self._load_data()
+        if 'id' not in trans_data:
+            trans_data['id'] = f"t{uuid.uuid4().hex[:6]}"
+        if 'transactions' not in data:
+            data['transactions'] = {}
+        data['transactions'][trans_data['id']] = trans_data
+        self._save_data(data)
+        return trans_data
+
+    # --- Metode Update Kompleks ---
     
-    def add_transaction(self, tx_data):
-        data = self._read_db()
-        if tx_data['id'] in data['transactions']:
-            raise ValueError("Transaction ID sudah ada")
-        data['transactions'][tx_data['id']] = tx_data
-        self._write_db(data)
-        return tx_data
+    def update_user_points_and_save(self, user_id, new_total_points):
+        """
+        Metode ini mengupdate poin pengguna secara spesifik.
+        Ini adalah bagian dari "transaksi" file JSON.
+        """
+        data = self._load_data()
+        if user_id in data.get('users', {}):
+            data['users'][user_id]['total_poin'] = new_total_points
+            self._save_data(data)
+            return True
+        return False
         
-    def get_transactions_by_user(self, user_id):
-        data = self._read_db()
-        txs = []
-        for tx in data.get('transactions', {}).values():
-            if tx['userId'] == user_id:
-                txs.append(tx)
-        return sorted(txs, key=lambda t: t['tanggal'], reverse=True)
+    def confirm_pickup_transaction(self, pickup_data, transaction_data, user_data):
+        """
+        Menyimpan beberapa update data sekaligus (pseudo-transaksi).
+        1. Update pickup
+        2. Buat transaksi baru
+        3. Update poin pengguna
+        """
+        data = self._load_data()
+        
+        # 1. Update pickup
+        if 'pickups' not in data: data['pickups'] = {}
+        data['pickups'][pickup_data['id']] = pickup_data
+        
+        # 2. Buat transaksi baru
+        if 'id' not in transaction_data:
+            transaction_data['id'] = f"t{uuid.uuid4().hex[:6]}"
+        if 'transactions' not in data: data['transactions'] = {}
+        data['transactions'][transaction_data['id']] = transaction_data
+        
+        # 3. Update poin pengguna
+        if 'users' not in data: data['users'] = {}
+        data['users'][user_data['id']] = user_data
+        
+        self._save_data(data)
+        return True
+
+    def redeem_reward_transaction(self, user_data, transaction_data):
+        """
+        Menyimpan update data untuk redeem reward (pseudo-transaksi).
+        1. Buat transaksi baru
+        2. Update poin pengguna
+        """
+        data = self._load_data()
+        
+        # 1. Buat transaksi baru
+        if 'id' not in transaction_data:
+            transaction_data['id'] = f"t{uuid.uuid4().hex[:6]}"
+        if 'transactions' not in data: data['transactions'] = {}
+        data['transactions'][transaction_data['id']] = transaction_data
+        
+        # 2. Update poin pengguna
+        if 'users' not in data: data['users'] = {}
+        data['users'][user_data['id']] = user_data
+        
+        self._save_data(data)
+        return True

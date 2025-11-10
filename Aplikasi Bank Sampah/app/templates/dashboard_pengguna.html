@@ -1,135 +1,106 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block title %}Dasbor Pengguna{% endblock %}
 
-{% block head %}
-<style>
-    body {
-        background-image: url("{{ url_for('static', filename='img/background 2.png') }}");
-        background-size: cover; /* Menutupi seluruh area background */
-        background-position: center; /* Memposisikan gambar di tengah */
-        background-repeat: no-repeat; /* Mencegah gambar berulang */
-        background-attachment: scroll; /* Membuat gambar tetap saat scroll */
-        /* Anda mungkin perlu menambahkan warna fallback */
-        background-color: #f0f0f0; 
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 p-4 md:p-8 relative z-10"> 
-
-    <div class="lg:col-span-1 space-y-6">
-        
-        <div class="p-4 bg-white rounded-2xl shadow-lg">
-            <h1 class="text-2xl font-bold text-gray-900">Dashboard Anda</h1>
-            <p class="mt-1 text-gray-600">
-                Selamat datang, {{ user.nama.split(' ')[0] }}!
-            </p>
-        </div>
-
-        <div class="p-6 rounded-2xl shadow-lg text-white" style="background-color: rgba(16, 185, 129, 0.9);"> {# Menggunakan warna hijau Tailwind bg-green-500 dengan transparansi #}
-            <h2 class="text-sm font-medium uppercase tracking-wider">Total Poin</h2>
-            <div class="my-3">
-                <span class="text-5xl font-extrabold tracking-tight">{{ user.totalPoin }}</span>
-            </div>
-            <a href="{{ url_for('main.reward_catalog') }}" class="inline-block w-full text-center bg-white text-green-600 font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-gray-100 transition-all">
-                Tukarkan
-            </a>
-        </div>
-
-        <div class="p-6 bg-white rounded-2xl shadow-lg" style="background-color: rgba(255, 255, 255, 0.9);">
-            <h3 class="text-lg font-bold text-gray-900 mb-4">Aksi Cepat</h3>
-            <ul class="space-y-4">
-                
-                <li>
-                    <a href="{{ url_for('main.new_pickup') }}" class="flex items-center text-gray-700 hover:text-green-600 font-medium group">
-                        <svg class="h-5 w-5 mr-3 text-gray-500 group-hover:text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.125-.504 1.125-1.125V14.25m-17.25 4.5h10.5" />
-                        </svg>
-                        Jadwalkan Penjemputan
-                    </a>
-                </li>
-                
-                <li>
-                    <a href="{{ url_for('main.reward_catalog') }}" class="flex items-center text-gray-700 hover:text-green-600 font-medium group">
-                        <svg class="h-5 w-5 mr-3 text-gray-500 group-hover:text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
-                        </svg>
-                        Lihat Katalog Reward
-                    </a>
-                </li>
-
-                <li>
-                    <a href="{{ url_for('main.map_placeholder') }}" class="flex items-center text-gray-700 hover:text-green-600 font-medium group">
-                        <svg class="h-5 w-5 mr-3 text-gray-500 group-hover:text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m0 0v2.25m0-2.25h1.5m-1.5 0H8.25m.75 2.25h1.5m-1.5 0H8.25m6.75-4.5V15m0 0v2.25m0-2.25h1.5m-1.5 0H13.5m.75 2.25h1.5m-1.5 0H13.5m-6.75-4.5V6.75m0 0H8.25m.75 0h1.5m2.25 0H13.5m0 0v2.25m0 0h1.5m-1.5 0H13.5m0-2.25h.008v.008h-.008V6.75Zm-6 0h.008v.008H8.25V6.75Z" />
-                        </svg>
-                        Peta Bank Sampah
-                    </a>
-                </li>
-                </ul>
-        </div>
+<!-- Desain berdasarkan Gambar 7 -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" style="background-color: #FFFAE7;">
+    
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Dashboard Anda</h1>
+        <p class="text-gray-600">Selamat datang, {{ data.user.nama }}!</p>
     </div>
-
-    <div class="lg:col-span-2">
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        <div class="bg-white rounded-2xl shadow-lg h-full" style="background-color: rgba(255, 255, 255, 0.9);">
+        <!-- Kolom Kiri: Poin dan Aksi Cepat -->
+        <div class="lg:col-span-1 space-y-6">
             
-            <div class="flex justify-between items-center p-6 border-b border-gray-200">
-                <h2 class="text-lg font-bold text-gray-900">
-                    Aktivitas Terkini
-                </h2>
-                <a href="#riwayat" class="text-sm font-medium text-green-600 hover:text-green-800">
-                    Lihat Semua
+            <!-- Kotak Total Poin -->
+            <div class="bg-green-500 p-6 rounded-2xl shadow-lg text-white" style="background-color: #28B56A;">
+                <p class="text-lg font-medium text-green-100">Total Poin Anda</p>
+                <p class="text-5xl font-bold mt-2">{{ data.user.total_poin | int }}</p>
+                <a href="{{ url_for('main.reward_catalog') }}">
+                    <button class="mt-6 w-full bg-white text-green-600 font-semibold py-3 px-4 rounded-lg shadow hover:bg-gray-50 transition duration-150">
+                        Tukarkan Poin
+                    </button>
                 </a>
             </div>
             
-            <div id="riwayat" class="flow-root">
-                <ul role="list" class="divide-y divide-gray-200">
-                    {% if transactions %}
-                        {% for tx in transactions %}
-                        <li class="p-6 hover:bg-gray-50">
-                            <div class="flex items-center space-x-4">
-                                <div class="flex-shrink-0">
-                                    <span class="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
-                                        <svg class="h-6 w-6 text-green-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                                        </svg>
-                                    </span>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-base font-semibold text-gray-900 truncate">
-                                        Setoran Sampah (ID: {{ tx.pickupId }})
-                                    </p>
-                                    <p class="text-sm text-gray-500 truncate">
-                                        {{ tx.tanggal }}
-                                    </p>
-                                </div>
-                                <div class="text-right">
-                                    <span class="text-lg font-bold text-green-600">
-                                        +{{ tx.totalPoin }} Poin
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="mt-4 pl-16 space-y-1">
-                                {% for item in tx.detail %}
-                                <p class="text-sm text-gray-600">
-                                    - {{ item.nama }} ({{ item.kg }} kg)
-                                </p>
-                                {% endfor %}
-                            </div>
-                        </li>
-                        {% endfor %}
-                    {% else %}
-                    <li class="p-6 text-center text-gray-500">
-                        Belum ada riwayat transaksi.
-                    </li>
-                    {% endif %}
-                </ul>
+            <!-- Kotak Aksi Cepat -->
+            <div class="bg-white p-6 rounded-2xl shadow-lg">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Aksi Cepat</h3>
+                <nav class="space-y-3">
+                    <a href="{{ url_for('main.schedule_pickup') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 transition duration-150">
+                        <!-- Icon Kalender (SVG) -->
+                        <svg class="h-6 w-6 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        <span class="font-medium text-gray-700">Jadwalkan Penjemputan</span>
+                    </a>
+                    <a href="{{ url_for('main.reward_catalog') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 transition duration-150">
+                        <!-- Icon Hadiah (SVG) -->
+                        <svg class="h-6 w-6 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4l1.447-1.447A1 1 0 017 10.086V11h10v-.914a1 1 0 01.553-.894L19 12m-14 0a1 1 0 011-1h12a1 1 0 011 1v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6z" /></svg>
+                        <span class="font-medium text-gray-700">Lihat Katalog Reward</span>
+                    </a>
+                    <a href="{{ url_for('main.map_placeholder') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 transition duration-150">
+                        <!-- Icon Peta (SVG) -->
+                        <svg class="h-6 w-6 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        <span class="font-medium text-gray-700">Peta Bank Sampah</span>
+                    </a>
+                </nav>
+            </div>
+            
+        </div>
+        
+        <!-- Kolom Kanan: Aktivitas Terkini -->
+        <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-lg">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-900">Aktivitas Terkini</h3>
+                <a href="#" class="text-sm font-medium text-green-600 hover:text-green-500">Lihat Semua</a>
+            </div>
+            
+            <!-- Daftar Aktivitas -->
+            <div class="space-y-4">
+                {% if data.recent_pickups %}
+                    {% for pickup in data.recent_pickups %}
+                    <div class="flex items-center p-4 rounded-lg border border-gray-200">
+                        <div class="mr-4">
+                            {% if pickup.status == 'selesai' %}
+                                <span class="flex h-12 w-12 rounded-full bg-green-100 items-center justify-center">
+                                    <!-- Icon Cek (Selesai) -->
+                                    <svg class="h-6 w-6 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                </span>
+                            {% else %}
+                                <span class="flex h-12 w-12 rounded-full bg-yellow-100 items-center justify-center">
+                                    <!-- Icon Jam (Menunggu) -->
+                                    <svg class="h-6 w-6 text-yellow-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                </span>
+                            {% endif %}
+                        </div>
+                        <div class="flex-grow">
+                            <p class="font-semibold text-gray-800">Penjemputan Terjadwal</p>
+                            <p class="text-sm text-gray-500">
+                                {{ pickup.tanggal }} jam {{ pickup.waktu }}
+                            </p>
+                        </div>
+                        <div>
+                            {% if pickup.status == 'selesai' %}
+                                <span class="px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                                    Selesai
+                                </span>
+                            {% else %}
+                                <span class="px-3 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
+                                    Menunggu
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-gray-500 text-center py-4">Belum ada aktivitas.</p>
+                {% endif %}
             </div>
         </div>
+        
     </div>
-    
 </div>
 {% endblock %}

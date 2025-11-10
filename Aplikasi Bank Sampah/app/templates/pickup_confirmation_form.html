@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Konfirmasi Setoran{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-white p-8 rounded-2xl shadow-lg">
+        <a href="{{ url_for('main.dashboard') }}" class="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 mb-4">
+            <svg class="h-5 w-5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Kembali ke Dasbor
+        </a>
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">Konfirmasi Setoran Sampah</h1>
+        <p class="text-gray-600 mb-6">Input berat sampah yang dijemput untuk dikonversi menjadi poin.</p>
+        
+        <form method="POST" action="{{ url_for('main.confirm_pickup', pickup_id=pickup_id) }}" class="space-y-6">
+            
+            <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">Input Sampah</h3>
+
+            {% if waste_types %}
+                {% for waste in waste_types %}
+                <div class="grid grid-cols-3 gap-4 items-center">
+                    <label for="waste_weight_{{ waste.id }}" class="col-span-1 text-sm font-medium text-gray-700">
+                        {{ waste.nama }}
+                    </label>
+                    <div class="col-span-2">
+                         <div class="relative">
+                            <input type="number" step="0.1" min="0" 
+                                   id="waste_weight_{{ waste.id }}" name="waste_weight_{{ waste.id }}"
+                                   class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                   placeholder="0.0">
+                            <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
+                                Kg
+                            </span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">{{ waste.nilai_poin_per_kg }} poin/kg</p>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-gray-500">Data master jenis sampah belum diatur oleh Admin.</p>
+            {% endif %}
+
+            
+            <div class="pt-4">
+                <button type="submit"
+                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150"
+                        {% if not waste_types %}disabled{% endif %}>
+                    Konfirmasi & Hitung Poin
+                </button>
+            </div>
+            
+        </form>
+    </div>
+</div>
+{% endblock %}

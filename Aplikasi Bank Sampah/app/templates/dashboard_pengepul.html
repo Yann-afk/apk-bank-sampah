@@ -1,77 +1,66 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}Dasbor Pengepul{% endblock %}
+{% block title %}Tugas Penjemputan{% endblock %}
 
 {% block content %}
-<div class="space-y-8">
-    
-    <div class="p-6 bg-white rounded-xl shadow-lg border border-gray-200">
-        <h1 class="text-3xl font-bold text-gray-900">
-            Halo, {{ current_user.nama }}!
-        </h1>
-        <p class="mt-2 text-lg text-gray-600">
-            Berikut adalah daftar tugas penjemputan yang perlu dikonfirmasi.
-        </p>
-    </div>
-
-    <!-- Daftar Tugas -->
-    <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-        <h2 class="text-2xl font-bold text-gray-900 p-6 border-b border-gray-200">
-            Tugas Penjemputan ({{ tasks|length }})
-        </h2>
+<!-- Desain berdasarkan Gambar 8 -->
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div class="p-6 border-b border-gray-200">
+            <h1 class="text-2xl font-bold text-gray-900">Tugas Penjemputan</h1>
+            <p class="text-gray-600">Selasa, 18 Oktober 2025</p> <!-- TODO: Buat tanggal ini dinamis -->
+        </div>
         
-        {% if tasks %}
-        <ul role="list" class="divide-y divide-gray-200">
-            {% for task in tasks %}
-            <li class="p-6">
-                <!-- Info Penjemputan -->
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-green-600">ID: {{ task.id }}</p>
-                        <h3 class="text-xl font-semibold text-gray-900">{{ task.namaPengguna }}</h3>
-                        <p class="mt-1 text-gray-600">{{ task.lokasi }}</p>
-                        <p class="mt-1 text-sm text-gray-500">
-                            Jadwal: <strong>{{ task.tanggal }}</strong> Pukul <strong>{{ task.waktu }}</strong>
-                        </p>
-                    </div>
-                    <div class="mt-4 md:mt-0 md:ml-6 flex-shrink-0">
-                        <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 capitalize">
-                            {{ task.status }}
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Form Konfirmasi (Input Sampah) -->
-                <form method="POST" action="{{ url_for('main.confirm_pickup', pickup_id=task.id) }}" class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <h4 class="text-base font-semibold text-gray-800">Input Berat Sampah (kg)</h4>
-                    <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {% for stype in sampah_types %}
-                        <div>
-                            <label for="kg-{{ stype.id }}-{{ task.id }}" class="block text-sm font-medium text-gray-700">
-                                {{ stype.nama }}
-                            </label>
-                            <input type="number" step="0.1" min="0" 
-                                   name="kg-{{ stype.id }}" id="kg-{{ stype.id }}-{{ task.id }}"
-                                   class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
-                                   placeholder="0.0">
+        <div class="p-6">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">
+                Hari Ini ({{ tasks | selectattr('status', 'equalto', 'menunggu') | list | length }} Tugas)
+            </h2>
+            
+            <div class="space-y-5">
+                {% if tasks %}
+                    {% for task in tasks %}
+                    <div class="border border-gray-200 rounded-lg p-5">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <p class="text-sm font-medium text-green-600">Pukul {{ task.waktu }} WIB</p>
+                                <p class="text-lg font-bold text-gray-900">{{ task.user_nama | default('Pengguna') }}</p> <!-- (Harus ditambahkan di service) -->
+                            </div>
+                            {% if task.status == 'menunggu' %}
+                                <span class="px-3 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
+                                    Menunggu
+                                </span>
+                            {% else %}
+                                <span class="px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
+                                    Selesai
+                                </span>
+                            {% endif %}
                         </div>
-                        {% endfor %}
-                    </div>
-                    <div class="mt-6 text-right">
-                        <button type="submit"
-                                class="inline-flex justify-center py-2 px-6 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
-                            Konfirmasi Pickup
+                        
+                        <div class="flex items-center text-gray-500 text-sm mb-4">
+                            <!-- Icon Lokasi (SVG) -->
+                            <svg class="h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                            <span>{{ task.lokasi }}</span>
+                        </div>
+                        
+                        {% if task.status == 'menunggu' %}
+                        <a href="{{ url_for('main.confirm_pickup', pickup_id=task.id) }}">
+                            <button class="w-full bg-green-600 text-white font-semibold py-3 px-4 rounded-lg shadow hover:bg-green-700 transition duration-150">
+                                Konfirmasi Setoran
+                            </button>
+                        </a>
+                        {% else %}
+                        <button class="w-full bg-gray-300 text-gray-600 font-semibold py-3 px-4 rounded-lg cursor-not-allowed" disabled>
+                            Telah Selesai
                         </button>
+                        {% endif %}
                     </div>
-                </form>
-            </li>
-            {% endfor %}
-        </ul>
-        {% else %}
-        <p class="p-6 text-center text-gray-500">
-            Tidak ada tugas penjemputan saat ini.
-        </p>
-        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <p class="text-gray-500 text-center py-4">Tidak ada tugas penjemputan hari ini.</p>
+                {% endif %}
+                
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

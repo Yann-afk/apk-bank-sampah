@@ -1,36 +1,77 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block title %}Peta Bank Sampah{% endblock %}
 
 {% block content %}
-<div class="flex items-center justify-center pt-12">
-        <div class="w-full max-w-2xl p-8 md:p-12 space-y-6 bg-white rounded-xl shadow-lg border border-gray-200 text-center">
-        
-                <h2 class="text-3xl font-bold text-center text-gray-900">
-            Peta Bank Sampah
-        </h2>
-        
-        <p class="text-gray-600">
-            Temukan lokasi bank sampah dan mitra daur ulang di sekitar Anda. Gunakan peta di bawah ini untuk navigasi.
-        </p>
+<!-- 
+Menambahkan Leaflet.js CSS dan JS.
+Ini dimuat di dalam blok konten agar hanya dieksekusi di halaman ini.
+-->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
 
-                <div class="w-full h-96 rounded-lg shadow-lg overflow-hidden border border-gray-200">
-                        <iframe
-                src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d63454.02047395066!2d106.7827907338779!3d-6.301648083811566!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1sbank%20sampah!5e0!3m2!1sid!2sid!4v1730953683050!5m2!1sid!2sid"
-                width="100%"
-                height="100%"
-                style="border:0;"
-                allowfullscreen=""
-                loading="lazy"
-                referrerpolicy="no-referrer-when-downgrade">
-            </iframe>
-    </div>
-        <div class="pt-6">
-            <a href="{{ url_for('main.dashboard_pengguna') }}"
-               class="inline-flex justify-center py-3 px-6 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
-                Kembali ke Dasbor
-            </a>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-white p-8 rounded-2xl shadow-lg">
+        <a href="{{ url_for('main.dashboard') }}" class="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 mb-4">
+            <svg class="h-5 w-5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Kembali ke Dasbor
+        </a>
+        <h1 class="text-2xl font-bold text-gray-900 mb-6 text-center">Peta Lokasi Bank Sampah</h1>
+        
+        <!-- 
+        Ini adalah div container untuk peta.
+        Leaflet akan menargetkan ID 'map'.
+        Saya menambah tingginya menjadi 600px agar lebih jelas.
+        -->
+        <div id="map" class="w-full h-[600px] bg-gray-200 rounded-lg z-0">
+            <!-- Peta akan dimuat di sini oleh JavaScript -->
         </div>
-    </div>
+    </div>
 </div>
+
+<script>
+    // Inisialisasi peta setelah dokumen dimuat
+    document.addEventListener('DOMContentLoaded', function () {
+        
+        // 1. Inisialisasi Peta
+        // Koordinat diubah ke Jabodetabek (pusat dekat Jakarta)
+        // Zoom disesuaikan ke 10 agar areanya lebih luas terlihat
+        var map = L.map('map').setView([-6.2088, 106.8456], 10);
+
+        // 2. Tambahkan Tile Layer (Tampilan Peta)
+        // Menggunakan OpenStreetMap (gratis)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        // 3. Tambahkan Contoh Marker (Pin Lokasi)
+        // Di aplikasi nyata, data ini akan diambil dari database.
+        
+        // Contoh Marker 1: Bank Sampah Induk (Kantor Admin)
+        L.marker([-6.3910, 106.8222]).addTo(map)
+            .bindPopup("<b>Bank Sampah Induk</b><br>Kantor Pusat Admin.");
+
+        // Contoh Marker 2: Lokasi Pengguna (Citra Pengguna - Depok)
+        L.marker([-6.4050, 106.8100]).addTo(map)
+            .bindPopup("<b>Lokasi Pengguna Citra</b><br>Jl. Merdeka No. 12, Depok.");
+            
+        // Contoh Marker 3: Area Pengepul (Budi Pengepul - Depok)
+        L.marker([-6.4120, 106.8300]).addTo(map)
+            .bindPopup("<b>Area Pengepul Budi</b><br>Siap menjemput di area ini.");
+            
+        // Contoh Marker 4: Bank Sampah Cabang Bekasi
+        L.marker([-6.2383, 106.9756]).addTo(map)
+            .bindPopup("<b>Bank Sampah Bekasi</b><br>Cabang area Bekasi.");
+
+        // Contoh Marker 5: Bank Sampah Cabang Tangerang
+        L.marker([-6.1783, 106.6319]).addTo(map)
+            .bindPopup("<b>Bank Sampah Tangerang</b><br>Cabang area Tangerang.");
+
+    });
+</script>
 {% endblock %}

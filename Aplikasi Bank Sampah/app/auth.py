@@ -1,118 +1,126 @@
-import uuid
+from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from functools import wraps
-from flask import (
-    Blueprint, render_template, request, redirect, url_for, flash, current_app
-)
-from flask_login import login_user, logout_user, login_required, current_user
-# Hapus import 'check_password_hash'
-# from werkzeug.security import check_password_hash
+from app.services import AuthService
 
-# Impor service dan User model dari __init__.py
-from . import service, User, repo
+# Membuat Blueprint untuk rute terkait otentikasi
+auth_bp = Blueprint('auth', __name__)
 
-# --- Blueprint ---
-auth_bp = Blueprint('auth', __name__, url_prefix='/')
+# Inisialisasi service
+auth_service = AuthService()
 
-# --- Role Decorator ---
+class User(UserMixin):
+    """
+    Kelas User yang kompatibel dengan Flask-Login.
+    Ini BUKAN model database, tapi sebuah wrapper untuk data pengguna
+    yang diambil dari repository (file JSON).
+    """
+    def __init__(self, user_data):
+        self.id = user_data.get('id')
+        self.nama = user_data.get('nama')
+        self.email = user_data.get('email')
+        self.role = user_data.get('role')
+        self.data = user_data # Menyimpan semua data asli
+
+    def get_id(self):
+        """Mengembalikan ID pengguna (harus string)."""
+        return str(self.id)
+
+    def is_role(self, role_name):
+        """Memeriksa apakah pengguna memiliki peran tertentu."""
+        return self.role == role_name
+
+# --- Decorator Kustom untuk Cek Peran ---
+
 def role_required(role_name):
-    """Decorator untuk membatasi akses berdasarkan role"""
+    """
+    Decorator untuk membatasi akses route berdasarkan peran pengguna.
+    """
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            if not current_user.is_authenticated or current_user.role != role_name:
-                flash(f"Akses ditolak. Anda harus login sebagai {role_name}.", 'error')
-                return redirect(url_for('auth.login'))
+            # Cek apakah pengguna sudah login
+            if not current_user.is_authenticated:
+                return redirect(url_for('auth.login', next=request.url))
+            
+            # Cek apakah pengguna memiliki peran yang diizinkan
+            if not current_user.is_role(role_name):
+                flash(f"Akses ditolak. Halaman ini khusus untuk {role_name}.", 'danger')
+                return redirect(url_for('main.index')) # Alihkan ke halaman utama
+                
             return f(*args, **kwargs)
         return decorated_function
     return decorator
 
+# --- Rute Otentikasi ---
 
-# --- Rute Autentikasi ---
-
-@auth_bp.route('/login', methods=('GET', 'POST'))
+@auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    """Menangani proses login user, sesuai screenshot"""
+    """
+    Menangani proses login pengguna.
+    """
     if current_user.is_authenticated:
-        return redirect(url_for('main.index')) # Redirect jika sudah login
+        return redirect(url_for('main.dashboard'))
 
     if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
+        email = request.form.get('email')
+        password = request.form.get('password')
         
-        # --- HAPUS SEMUA DEBUGGING PRINT ---
+        user_data, message = auth_service.authenticate_user(email, password)
         
-        # Ambil data user dari repository
-        user_dict = repo.get_user_by_email(email)
-        
-        if user_dict:
+        if user_data:
+            # Buat objek User wrapper
+            user_obj = User(user_data)
+            # Login-kan pengguna
+            login_user(user_obj, remember=request.form.get('remember'))
+            flash(message, 'success')
             
-            try:
-                # Ganti 'check_password_hash' dengan perbandingan string biasa
-                is_password_correct = (user_dict['password'] == password)
-                
-                if is_password_correct:
-                    user_obj = User(user_dict)
-                    login_user(user_obj)
-                    flash(f"Selamat datang kembali, {user_obj.nama}!", 'success')
-                    
-                    if user_obj.is_admin:
-                        return redirect(url_for('main.dashboard_admin'))
-                    elif user_obj.is_pengepul:
-                        return redirect(url_for('main.dashboard_pengepul'))
-                    else:
-                        return redirect(url_for('main.dashboard_pengguna'))
-                else:
-                    # print("Login GAGAL: Password tidak cocok.") <-- Dihapus
-                    flash('Email atau password salah.', 'error')
-            except Exception as e:
-                # print(f"ERROR saat perbandingan: {e}") <-- Dihapus
-                flash(f'Terjadi error: {e}', 'error')
-        
+            # Arahkan ke rute 'next' jika ada (misal, jika dialihkan dari halaman terproteksi)
+            next_page = request.args.get('next')
+            return redirect(next_page or url_for('main.dashboard'))
         else:
-            # print("Login GAGAL: User TIDAK DITEMUKAN.") <-- Dihapus
-            flash('Email atau password salah.', 'error')
+            flash(message, 'danger')
             
-        # print("--- AKHIR DEBUGGING ---\n") <-- Dihapus
+    return render_template('login.html', title="Login")
 
-    return render_template('login.html')
-
-@auth_bp.route('/register', methods=('GET', 'POST'))
+@auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
-    """Menangani proses registrasi user baru, sesuai screenshot"""
+    """
+    Menangani proses registrasi pengguna baru.
+    """
     if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.dashboard'))
 
     if request.method == 'POST':
-        nama = request.form['nama']
-        email = request.form['email']
-        password = request.form['password']
-        alamat = request.form['alamat']
-        role = request.form.get('role', 'pengguna') 
-        
-        try:
-            # Panggil service untuk registrasi
-            new_user = service.register_user(
-                id=str(uuid.uuid4()),
-                nama=nama,
-                email=email,
-                password=password,
-                role=role,
-                alamat=alamat
-            )
-            if new_user:
-                flash('Registrasi berhasil! Silakan login.', 'success')
-                return redirect(url_for('auth.login'))
-            else:
-                flash('Email sudah terdaftar.', 'error')
-        except Exception as e:
-            flash(f'Terjadi kesalahan: {e}', 'error')
+        nama = request.form.get('nama')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        role = request.form.get('role', 'pengguna') # Default 'pengguna'
+        alamat = request.form.get('alamat')
+        area_tugas = request.form.get('area_tugas')
 
-    return render_template('register.html')
+        if password != request.form.get('confirm_password'):
+            flash("Password dan konfirmasi password tidak cocok.", 'danger')
+            return render_template('register.html', title="Register")
+
+        saved_user, message = auth_service.register_user(
+            nama, email, password, role, alamat, area_tugas
+        )
+        
+        if saved_user:
+            flash(message, 'success')
+            return redirect(url_for('auth.login'))
+        else:
+            flash(message, 'danger')
+            
+    return render_template('register.html', title="Register")
 
 @auth_bp.route('/logout')
 @login_required
 def logout():
-    """Menangani proses logout user"""
+    """
+    Menangani proses logout pengguna.
+    """
     logout_user()
-    flash('Anda telah logout.', 'success')
+    flash('Anda telah berhasil logout.', 'success')
     return redirect(url_for('auth.login'))
