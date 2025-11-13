@@ -15,7 +15,12 @@
         }
     </style>
 </head>
-<body class="bg-gray-100">
+<!-- 
+  PERUBAHAN ADA DI SINI:
+  Class 'bg-gray-100' sekarang ada di dalam block 'body_class'
+  agar bisa diganti oleh halaman anak (seperti dashboard_pengguna.html).
+-->
+<body class="{% block body_class %}bg-gray-100{% endblock %}">
 
     <div class="min-h-screen">
         <!-- Navigasi (hanya tampil jika pengguna sudah login) -->
