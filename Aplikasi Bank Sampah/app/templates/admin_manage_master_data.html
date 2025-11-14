@@ -3,17 +3,36 @@
 {% block title %}Manajemen Data Master{% endblock %}
 
 {% block content %}
+<div class="flex flex-col md:flex-row min-h-screen bg-gray-100">
+
+    <!-- === SIDEBAR === -->
+    <aside class="w-full md:w-64 bg-white shadow-md">
+        <div class="p-6">
+            <h2 class="text-2xl font-bold text-gray-800">Dashboard Admin</h2>
+        </div>
+        <nav class="mt-6">
+            <a href="{{ url_for('main.dashboard') }}" class="block px-6 py-3 text-gray-700 hover:bg-gray-100">
+                Dashboard
+            </a>
+            <a href="{{ url_for('main.admin_manage_users') }}" class="block px-6 py-3 text-gray-700 hover:bg-gray-100">
+                Manajemen Pengguna
+            </a>
+            <!-- Menandai link ini sebagai aktif -->
+            <a href="{{ url_for('main.admin_manage_master_data') }}" class="block px-6 py-3 text-blue-700 bg-blue-50 font-medium">
+                Manajemen Data Master
+            </a>
+            <a href="{{ url_for('main.admin_monitor_transactions') }}" class="block px-6 py-3 text-gray-700 hover:bg-gray-100">
+                Monitor Transaksi
+            </a>
+        </nav>
+    </aside>
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <a href="{{ url_for('main.dashboard') }}" class="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 mb-4">
-        <svg class="h-5 w-5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-        Kembali ke Dasbor Admin
-    </a>
     <h1 class="text-3xl font-bold text-gray-900 mb-6">Manajemen Data Master</h1>
     
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         <!-- Kolom Kiri: Kelola Jenis Sampah -->
-        <div class="bg-white p-8 rounded-2xl shadow-lg">
+        <div class="bg-white p-4 rounded-md shadow-lg">
             <h2 class="text-2xl font-bold text-gray-900 mb-6">Kelola Jenis Sampah</h2>
             
             <!-- Form Tambah Jenis Sampah -->
@@ -99,7 +118,6 @@
                 {% endfor %}
             </ul>
         </div>
-        
-    </div>
+    </main>
 </div>
 {% endblock %}
