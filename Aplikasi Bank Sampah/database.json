@@ -36,6 +36,16 @@
       "total_poin": 90000,
       "alamat": "Jl.Dramaga",
       "area_tugas": null
+    },
+    "u9bb50f": {
+      "id": "u9bb50f",
+      "nama": "Abdullah",
+      "email": "Saya@gmail.com",
+      "password": "Saya1234",
+      "role": "pengguna",
+      "total_poin": 994999,
+      "alamat": "Jl.Dramaga",
+      "area_tugas": null
     }
   },
   "waste_types": {
@@ -219,6 +229,14 @@
       "deskripsi": "Tukar: Voucher Pulsa Rp 5.000",
       "jumlah_poin": -5000,
       "id": "tac5bfc"
+    },
+    "tb6b1b6": {
+      "user_id": "u9bb50f",
+      "tanggal": "2025-11-29",
+      "tipe": "redeem_reward",
+      "deskripsi": "Tukar: Voucher Pulsa Rp 5.000",
+      "jumlah_poin": -5000,
+      "id": "tb6b1b6"
     }
   }
 }

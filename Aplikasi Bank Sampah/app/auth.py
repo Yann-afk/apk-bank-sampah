@@ -3,10 +3,8 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, login_
 from functools import wraps
 from app.services import AuthService
 
-# Membuat Blueprint untuk rute terkait otentikasi
 auth_bp = Blueprint('auth', __name__)
 
-# Inisialisasi service
 auth_service = AuthService()
 
 class User(UserMixin):
@@ -69,13 +67,10 @@ def login():
         user_data, message = auth_service.authenticate_user(email, password)
         
         if user_data:
-            # Buat objek User wrapper
             user_obj = User(user_data)
-            # Login-kan pengguna
             login_user(user_obj, remember=request.form.get('remember'))
             flash(message, 'success')
-            
-            # Arahkan ke rute 'next' jika ada (misal, jika dialihkan dari halaman terproteksi)
+
             next_page = request.args.get('next')
             return redirect(next_page or url_for('main.dashboard'))
         else:
