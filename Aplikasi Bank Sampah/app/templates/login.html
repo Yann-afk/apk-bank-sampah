@@ -54,20 +54,50 @@
                     </button>
                 </div>
 
-                <div>
-                    <button type="button"
-                            class="w-full flex justify-center items-center py-3 px-4 border border-gray-300 rounded-lg text-base font-medium text-gray-700 bg-white hover:bg-gray-50 transition duration-150">
-                        
-                        <svg class="mr-3 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M22.5 12.0003c0-.688-.063-1.332-.176-1.954H12v3.693h5.952c-.257 1.488-1.125 2.747-2.474 3.596v2.378h3.064c1.8-.005 3.328-1.503 3.328-3.79s-.004-3.513-.004-3.513z" fill="#4285F4"/>
-                            <path d="M12 23c3.085 0 5.672-1.025 7.56-2.784l-3.064-2.378c-.85.568-1.944.896-3.496.896-2.684 0-4.966-1.789-5.787-4.18H3.149v2.463A10.99 10.99 0 0012 23z" fill="#34A853"/>
-                            <path d="M6.213 13.812c-.223-.674-.35-1.385-.35-2.109s.127-1.435.35-2.109V7.139H3.149A10.957 10.957 0 001 12.0003c0 1.673.407 3.256 1.12 4.673l2.093-1.687-.417-.174z" fill="#FBBC05"/>
-                            <path d="M12 5.143c1.693 0 3.208.683 4.385 1.777l2.716-2.617C17.672 3.025 15.085 2 12 2A10.99 10.99 0 003.149 7.139L6.213 9.6c.821-2.392 3.103-4.18 5.787-4.18z" fill="#EA4335"/>
-                        </svg>
-                        
-                        Masuk dengan Google
-                    </button>
+                <div class="flex items-center my-6">
+                    <div class="flex-grow border-t border-gray-300"></div>
+                    <span class="flex-shrink mx-4 text-gray-400 text-sm">ATAU</span>
+                    <div class="flex-grow border-t border-gray-300"></div>
                 </div>
+
+                <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+                <div id="g_id_onload"
+                    data-client_id="<GANTI DENGAN CLIENT_ID ANDA>"
+                    data-context="signin"
+                    data-ux_mode="popup"
+                    data-callback="handleCredentialResponse"
+                    data-auto_prompt="false">
+                </div>
+
+                <div class="g_id_signin"
+                    data-type="standard"
+                    data-shape="rectangular"
+                    data-theme="outline"
+                    data-text="signin_with"
+                    data-size="large"
+                    data-logo_alignment="left">
+                </div>
+
+                <script>
+                function handleCredentialResponse(response) {
+
+                    const idToken = response.credential;
+                    console.log("ID Token diterima:", idToken);
+                    
+                    fetch('/api/auth/google', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ token: idToken }),
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                    console.log('Login berhasil:', data);
+                    });
+                }
+                </script>
             </form>
             
             <p class="text-center text-sm text-gray-600 mt-8">
