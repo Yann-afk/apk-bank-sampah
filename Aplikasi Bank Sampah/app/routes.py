@@ -165,6 +165,29 @@ def admin_manage_users():
     users = admin_service.get_all_user_accounts()
     return render_template('admin_manage_users.html', title="Manajemen Pengguna", users=users)
 
+@main_bp.route('/admin/users/add', methods=['POST'])
+@login_required
+@role_required('admin')
+def admin_add_user():
+    """
+    Rute untuk menambah pengguna baru (Admin).
+    """
+    nama = request.form.get('nama')
+    email = request.form.get('email')
+    password = request.form.get('password')
+    role = request.form.get('role')
+
+    # Memanggil service untuk menambahkan pengguna
+    # Pastikan AdminService memiliki fungsi create_user_account
+    ok, message = admin_service.create_user_account(nama, email, password, role)
+    
+    if ok:
+        flash(message, 'success')
+    else:
+        flash(message, 'danger')
+        
+    return redirect(url_for('main.admin_manage_users'))
+
 @main_bp.route('/admin/master_data', methods=['GET', 'POST'])
 @login_required
 @role_required('admin')
@@ -215,7 +238,7 @@ def admin_monitor_transactions():
         transactions=transactions
     )
 
-# --- Rute untuk ADMIN (Lanjutan) ---
+# --- Rute untuk ADMIN (Aksi CRUD) ---
 
 @main_bp.route('/admin/users/edit/<string:user_id>', methods=['POST'])
 @login_required
@@ -228,8 +251,6 @@ def admin_edit_user(user_id):
     email = request.form.get('email')
     role = request.form.get('role')
     
-    # Memanggil service untuk update data ke database
-    # Pastikan AdminService memiliki fungsi update_user_account
     ok, message = admin_service.update_user_account(user_id, nama, email, role)
     
     if ok:
@@ -246,8 +267,6 @@ def admin_delete_user(user_id):
     """
     Rute untuk menghapus akun pengguna secara permanen.
     """
-    # Memanggil service untuk hapus data dari database
-    # Pastikan AdminService memiliki fungsi delete_user_account
     ok, message = admin_service.delete_user_account(user_id)
     
     if ok:

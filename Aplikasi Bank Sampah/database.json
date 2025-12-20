@@ -3,7 +3,7 @@
     "u1": {
       "id": "u1",
       "nama": "Admin Utama",
-      "email": "admin@example.com",
+      "email": "admin@gmail.com",
       "password": "admin123",
       "role": "admin",
       "total_poin": 0,
@@ -12,7 +12,7 @@
     "u2": {
       "id": "u2",
       "nama": "Budi Pengepul",
-      "email": "pengepul@example.com",
+      "email": "pengepul@gmail.com",
       "password": "pengepul123",
       "role": "pengepul",
       "total_poin": 0,
@@ -21,20 +21,20 @@
     "u3": {
       "id": "u3",
       "nama": "Citra Pengguna",
-      "email": "pengguna@example.com",
+      "email": "pengguna@gmail.com",
       "password": "pengguna123",
       "role": "pengguna",
       "total_poin": 951384.0,
       "alamat": "Jl. Merdeka No. 12, Depok"
     },
-    "u9bb50f": {
-      "id": "u9bb50f",
-      "nama": "Abdullah",
-      "email": "Saya@gmail.com",
-      "password": "Saya1234",
+    "u782de4": {
+      "id": "u782de4",
+      "nama": "gema",
+      "email": "gema@gmail.com",
+      "password": "gema123",
       "role": "pengguna",
-      "total_poin": 994999,
-      "alamat": "Jl.Dramaga",
+      "total_poin": 700.0,
+      "alamat": "stmik tazkia",
       "area_tugas": null
     }
   },
@@ -53,6 +53,16 @@
       "id": "wt3",
       "nama": "Kaleng Aluminium",
       "nilai_poin_per_kg": 1000
+    },
+    "wt85c0": {
+      "nama": "kaca",
+      "nilai_poin_per_kg": 5000,
+      "id": "wt85c0"
+    },
+    "wtfef5": {
+      "nama": "organik",
+      "nilai_poin_per_kg": 300,
+      "id": "wtfef5"
     }
   },
   "rewards": {
@@ -79,6 +89,12 @@
       "deskripsi": "Dapatkan 5000 Diamond MLBB",
       "poin_dibutuhkan": 10000,
       "id": "r7ea1"
+    },
+    "rfbb6": {
+      "nama": "1000 DM FF",
+      "deskripsi": "Diamon ff",
+      "poin_dibutuhkan": 7000,
+      "id": "rfbb6"
     }
   },
   "pickups": {
@@ -121,6 +137,26 @@
       "pengepul_id": "u2",
       "notes": "",
       "id": "pa50ac4"
+    },
+    "p64d70c": {
+      "user_id": "u5eb975",
+      "tanggal": "2025-12-22",
+      "waktu": "12:37",
+      "lokasi": "haha",
+      "status": "selesai",
+      "pengepul_id": "u2",
+      "notes": "",
+      "id": "p64d70c"
+    },
+    "p28191e": {
+      "user_id": "u782de4",
+      "tanggal": "2025-12-21",
+      "waktu": "10:00",
+      "lokasi": "stmik tazkia",
+      "status": "selesai",
+      "pengepul_id": "u2",
+      "notes": "depan pagar",
+      "id": "p28191e"
     }
   },
   "transactions": {
@@ -227,6 +263,46 @@
       "deskripsi": "Tukar: Voucher Pulsa Rp 5.000",
       "jumlah_poin": -5000,
       "id": "tb6b1b6"
+    },
+    "t7aeacb": {
+      "user_id": "u5eb975",
+      "tanggal": "2025-12-20",
+      "tipe": "setor_sampah",
+      "deskripsi": "Setor sampah (Botol Plastik (PET): 2.0kg, Kardus: 22.0kg, Kaleng Aluminium: 2.0kg)",
+      "jumlah_poin": 5700.0,
+      "id": "t7aeacb"
+    },
+    "t218d41": {
+      "user_id": "u5eb975",
+      "tanggal": "2025-12-20",
+      "tipe": "redeem_reward",
+      "deskripsi": "Tukar: Voucher Pulsa Rp 5.000",
+      "jumlah_poin": -5000,
+      "id": "t218d41"
+    },
+    "t99d591": {
+      "user_id": "u782de4",
+      "tanggal": "2025-12-20",
+      "tipe": "setor_sampah",
+      "deskripsi": "Setor sampah (Botol Plastik (PET): 2.0kg, Kardus: 2.0kg, Kaleng Aluminium: 2.0kg, kaca: 2.0kg)",
+      "jumlah_poin": 12700.0,
+      "id": "t99d591"
+    },
+    "tc9e46f": {
+      "user_id": "u782de4",
+      "tanggal": "2025-12-20",
+      "tipe": "redeem_reward",
+      "deskripsi": "Tukar: 1000 DM FF",
+      "jumlah_poin": -7000,
+      "id": "tc9e46f"
+    },
+    "t5b7528": {
+      "user_id": "u782de4",
+      "tanggal": "2025-12-20",
+      "tipe": "redeem_reward",
+      "deskripsi": "Tukar: Voucher Pulsa Rp 5.000",
+      "jumlah_poin": -5000,
+      "id": "t5b7528"
     }
   }
 }
