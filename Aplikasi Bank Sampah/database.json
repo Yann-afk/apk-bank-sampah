@@ -27,15 +27,31 @@
       "total_poin": 951384.0,
       "alamat": "Jl. Merdeka No. 12, Depok"
     },
-    "u782de4": {
-      "id": "u782de4",
-      "nama": "gema",
+    "uacc3a3": {
+      "id": "uacc3a3",
+      "nama": "Abdullah",
+      "email": "Saya@gmail.com",
+      "password": "saya123",
+      "role": "pengguna",
+      "total_poin": 0,
+      "alamat": "Asrama",
+      "area_tugas": null,
+      "is_shadow_banned": false,
+      "needs_extra_verification": true,
+      "ban_until": null
+    },
+    "ua671cd": {
+      "id": "ua671cd",
+      "nama": "Gema",
       "email": "gema@gmail.com",
       "password": "gema123",
       "role": "pengguna",
-      "total_poin": 700.0,
-      "alamat": "stmik tazkia",
-      "area_tugas": null
+      "total_poin": 0,
+      "alamat": "STMIK TAZKIA",
+      "area_tugas": null,
+      "is_shadow_banned": false,
+      "needs_extra_verification": true,
+      "ban_until": "21-12-2026"
     }
   },
   "waste_types": {
@@ -157,6 +173,158 @@
       "pengepul_id": "u2",
       "notes": "depan pagar",
       "id": "p28191e"
+    },
+    "p09b2a6": {
+      "user_id": "u782de4",
+      "tanggal": "2025-12-21",
+      "waktu": "11:41",
+      "lokasi": "stmik tazkia",
+      "status": "selesai",
+      "pengepul_id": "u2",
+      "notes": "",
+      "id": "p09b2a6"
+    },
+    "p3f95e8": {
+      "user_id": "u782de4",
+      "tanggal": "2025-12-21",
+      "waktu": "11:42",
+      "lokasi": "stmik tazkia",
+      "status": "selesai",
+      "pengepul_id": "u2",
+      "notes": "",
+      "id": "p3f95e8"
+    },
+    "pc3e400": {
+      "user_id": "u782de4",
+      "tanggal": "2025-12-21",
+      "waktu": "10:42",
+      "lokasi": "stmik tazkia",
+      "status": "selesai",
+      "pengepul_id": "u2",
+      "notes": "",
+      "photo_path": null,
+      "id": "pc3e400"
+    },
+    "p0457b8": {
+      "user_id": "u782de4",
+      "tanggal": "2025-12-21",
+      "waktu": "12:45",
+      "lokasi": "stmik tazkia",
+      "status": "selesai",
+      "pengepul_id": "u2",
+      "notes": "",
+      "photo_path": null,
+      "id": "p0457b8"
+    },
+    "p45fc6c": {
+      "user_id": "u782de4",
+      "tanggal": "2025-12-21",
+      "waktu": "10:47",
+      "lokasi": "stmik tazkia",
+      "status": "selesai",
+      "pengepul_id": "u2",
+      "notes": "",
+      "photo_path": null,
+      "id": "p45fc6c"
+    },
+    "pd66b9f": {
+      "user_id": "u782de4",
+      "tanggal": "2025-12-21",
+      "waktu": "10:47",
+      "lokasi": "stmik tazkia",
+      "status": "selesai",
+      "pengepul_id": "u2",
+      "notes": "",
+      "photo_path": null,
+      "id": "pd66b9f"
+    },
+    "p62edfb": {
+      "user_id": "u782de4",
+      "tanggal": "2025-12-21",
+      "waktu": "13:50",
+      "lokasi": "stmik tazkia",
+      "status": "selesai",
+      "pengepul_id": "u2",
+      "notes": "",
+      "photo_path": null,
+      "id": "p62edfb"
+    },
+    "pfe4d1f": {
+      "user_id": "u782de4",
+      "tanggal": "2025-12-21",
+      "waktu": "12:51",
+      "lokasi": "stmik tazkia",
+      "status": "selesai",
+      "pengepul_id": "u2",
+      "notes": "",
+      "photo_path": "Screenshot (23).png",
+      "id": "pfe4d1f"
+    },
+    "p713327": {
+      "user_id": "u782de4",
+      "tanggal": "2025-12-21",
+      "waktu": "11:57",
+      "lokasi": "stmik tazkia",
+      "status": "selesai",
+      "pengepul_id": "u2",
+      "notes": "",
+      "photo_path": "Screenshot (22).png",
+      "id": "p713327"
+    },
+    "p9800aa": {
+      "user_id": "u782de4",
+      "tanggal": "2025-12-27",
+      "waktu": "13:02",
+      "lokasi": "stmik tazkia",
+      "status": "selesai",
+      "pengepul_id": "u2",
+      "notes": "",
+      "photo_path": "Screenshot (21).png",
+      "id": "p9800aa"
+    },
+    "p5262ab": {
+      "user_id": "u782de4",
+      "tanggal": "2025-12-28",
+      "waktu": "13:05",
+      "lokasi": "stmik tazkia",
+      "status": "selesai",
+      "pengepul_id": "u2",
+      "notes": "",
+      "photo_path": "20251220_090505_Screenshot_20.png",
+      "id": "p5262ab"
+    },
+    "pb4d9ac": {
+      "user_id": "ua671cd",
+      "tanggal": "2025-12-21",
+      "waktu": "12:31",
+      "lokasi": "STMIK TAZKIA",
+      "status": "pelanggaran",
+      "pengepul_id": null,
+      "notes": "",
+      "photo_path": "20251220_093117_Screenshot_23.png",
+      "id": "pb4d9ac"
+    },
+    "p04cd45": {
+      "user_id": "ua671cd",
+      "tanggal": "2025-12-21",
+      "waktu": "12:39",
+      "lokasi": "STMIK TAZKIA",
+      "status": "pelanggaran",
+      "pengepul_id": null,
+      "notes": "",
+      "photo_path": "20251220_094001_Screenshot_23.png",
+      "id": "p04cd45"
+    },
+    "pe27276": {
+      "user_id": "ua671cd",
+      "tanggal": "2025-12-21",
+      "waktu": "12:10",
+      "lokasi": "STMIK TAZKIA",
+      "status": "pelanggaran",
+      "pengepul_id": null,
+      "notes": "",
+      "photo_path": "20251220_094245_Screenshot_19.png",
+      "id": "pe27276"
     }
   },
   "transactions": {
@@ -303,6 +471,94 @@
       "deskripsi": "Tukar: Voucher Pulsa Rp 5.000",
       "jumlah_poin": -5000,
       "id": "t5b7528"
+    },
+    "t558bf0": {
+      "user_id": "u782de4",
+      "tanggal": "2025-12-20",
+      "tipe": "setor_sampah",
+      "deskripsi": "Setor sampah (Botol Plastik (PET): 2.0kg, Kardus: 2.0kg)",
+      "jumlah_poin": 700.0,
+      "id": "t558bf0"
+    },
+    "t58dc35": {
+      "user_id": "u782de4",
+      "tanggal": "2025-12-20",
+      "tipe": "setor_sampah",
+      "deskripsi": "Setor sampah (Botol Plastik (PET): 2.0kg, Kardus: 2.0kg, Kaleng Aluminium: 2.0kg)",
+      "jumlah_poin": 2700.0,
+      "id": "t58dc35"
+    },
+    "t8ab838": {
+      "user_id": "u782de4",
+      "tanggal": "2025-12-20",
+      "tipe": "setor_sampah",
+      "deskripsi": "Setor sampah (Botol Plastik (PET): 2.0kg, Kardus: 2.0kg, Kaleng Aluminium: 2.0kg, kaca: 2.0kg, organik: 2.0kg)",
+      "jumlah_poin": 13300.0,
+      "id": "t8ab838"
+    },
+    "tdb64cc": {
+      "user_id": "u782de4",
+      "tanggal": "2025-12-20",
+      "tipe": "setor_sampah",
+      "deskripsi": "Setor sampah (Botol Plastik (PET): 2.0kg, Kardus: 2.0kg, Kaleng Aluminium: 2.0kg, kaca: 2.0kg, organik: 2.0kg)",
+      "jumlah_poin": 13300.0,
+      "id": "tdb64cc"
+    },
+    "t65b9df": {
+      "user_id": "u782de4",
+      "tanggal": "2025-12-20",
+      "tipe": "setor_sampah",
+      "deskripsi": "Setor sampah (Botol Plastik (PET): 2.0kg, Kardus: 2.0kg, Kaleng Aluminium: 2.0kg, kaca: 2.0kg, organik: 2.0kg)",
+      "jumlah_poin": 13300.0,
+      "id": "t65b9df"
+    },
+    "t2d6e67": {
+      "user_id": "u782de4",
+      "tanggal": "2025-12-20",
+      "tipe": "setor_sampah",
+      "deskripsi": "Setor sampah (Botol Plastik (PET): 2.0kg, Kardus: 2.0kg, Kaleng Aluminium: 2.0kg, kaca: 2.0kg, organik: 2.0kg)",
+      "jumlah_poin": 13300.0,
+      "id": "t2d6e67"
+    },
+    "t90a44b": {
+      "user_id": "u782de4",
+      "tanggal": "2025-12-20",
+      "tipe": "setor_sampah",
+      "deskripsi": "Setor sampah (Botol Plastik (PET): 2.0kg, Kardus: 2.0kg, Kaleng Aluminium: 2.0kg, kaca: 2.0kg, organik: 2.0kg)",
+      "jumlah_poin": 13300.0,
+      "id": "t90a44b"
+    },
+    "t052a2e": {
+      "user_id": "u782de4",
+      "tanggal": "2025-12-20",
+      "tipe": "setor_sampah",
+      "deskripsi": "Setor sampah (Botol Plastik (PET): 2.0kg, Kardus: 2.0kg, Kaleng Aluminium: 2.0kg, kaca: 2.0kg, organik: 2.0kg)",
+      "jumlah_poin": 13300.0,
+      "id": "t052a2e"
+    },
+    "t00c748": {
+      "user_id": "u782de4",
+      "tanggal": "2025-12-20",
+      "tipe": "setor_sampah",
+      "deskripsi": "Setor sampah (Botol Plastik (PET): 2.0kg, Kardus: 2.0kg, Kaleng Aluminium: 2.0kg, kaca: 2.0kg, organik: 2.0kg)",
+      "jumlah_poin": 13300.0,
+      "id": "t00c748"
+    },
+    "tcf8000": {
+      "user_id": "u782de4",
+      "tanggal": "2025-12-20",
+      "tipe": "setor_sampah",
+      "deskripsi": "Setor sampah (Botol Plastik (PET): 2.0kg, Kardus: 2.0kg, Kaleng Aluminium: 2.0kg, kaca: 2.0kg, organik: 2.0kg)",
+      "jumlah_poin": 13300.0,
+      "id": "tcf8000"
+    },
+    "t6a7738": {
+      "user_id": "u782de4",
+      "tanggal": "2025-12-20",
+      "tipe": "setor_sampah",
+      "deskripsi": "Setor sampah (Botol Plastik (PET): 2.0kg, Kardus: 2.0kg, Kaleng Aluminium: 2.0kg, kaca: 2.0kg, organik: 2.0kg)",
+      "jumlah_poin": 13300.0,
+      "id": "t6a7738"
     }
   }
 }

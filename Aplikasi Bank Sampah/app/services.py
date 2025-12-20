@@ -1,4 +1,7 @@
+import os
 from datetime import datetime
+from flask import current_app
+from werkzeug.utils import secure_filename
 from app.repository import UserRepository, DataRepository
 
 # Inisialisasi repositori
@@ -29,7 +32,10 @@ class AuthService:
             "role": role,
             "total_poin": 0,
             "alamat": alamat,
-            "area_tugas": area_tugas if role == 'pengepul' else None
+            "area_tugas": area_tugas if role == 'pengepul' else None,
+            "is_shadow_banned": False, # Default: Tidak kena ban
+            "needs_extra_verification": False, # Default: Tidak butuh verifikasi foto
+            "ban_until": None # Tanggal berakhir ban
         }
 
         # Simpan pengguna baru
@@ -57,10 +63,36 @@ class PenggunaService:
     """
     Service untuk logika bisnis yang terkait dengan Pengguna.
     """
-    def schedule_pickup(self, user_id, tanggal, waktu, lokasi, notes):
+    def schedule_pickup(self, user_id, tanggal, waktu, lokasi, notes, waste_photo=None):
         """
         Membuat jadwal penjemputan baru.
+        Mendukung verifikasi tambahan melalui waste_photo.
         """
+        # Logika Tambahan: Jika foto wajib (needs_extra_verification) tapi tidak ada
+        user = user_repo.get_user_by_id(user_id)
+        if user.get('needs_extra_verification') and not waste_photo:
+            return None, "Anda wajib mengunggah foto sampah untuk verifikasi."
+
+        filename = None
+        # --- LOGIKA PENYIMPANAN FILE FISIK ---
+        if waste_photo and waste_photo.filename != '':
+            # 1. Amankan nama file dengan timestamp agar unik
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            filename = secure_filename(f"{timestamp}_{waste_photo.filename}")
+            
+            # 2. Tentukan path folder static/uploads/waste_photos
+            upload_path = os.path.join(current_app.root_path, 'static', 'uploads', 'waste_photos')
+            
+            # 3. Buat folder jika belum ada
+            if not os.path.exists(upload_path):
+                os.makedirs(upload_path)
+            
+            # 4. Simpan file secara fisik ke server
+            try:
+                waste_photo.save(os.path.join(upload_path, filename))
+            except Exception as e:
+                return None, f"Gagal menyimpan file foto: {e}"
+
         pickup_data = {
             "user_id": user_id,
             "tanggal": tanggal,
@@ -68,8 +100,10 @@ class PenggunaService:
             "lokasi": lokasi,
             "status": "menunggu",
             "pengepul_id": None,
-            "notes": notes
+            "notes": notes,
+            "photo_path": filename # Menyimpan nama file hasil proses ke database
         }
+        
         try:
             saved_pickup = data_repo.save_pickup(pickup_data)
             return saved_pickup, "Jadwal berhasil dibuat."
@@ -207,6 +241,37 @@ class PengepulService:
             return pickup, f"Konfirmasi berhasil. {total_poin} poin ditambahkan ke pengguna."
         except Exception as e:
             return None, f"Gagal menyimpan konfirmasi: {e}"
+
+    def report_pickup_violation(self, pickup_id):
+        """
+        Logika untuk menangani laporan pelanggaran (misal: sampah tidak ada di lokasi).
+        """
+        pickup = data_repo.get_pickup_by_id(pickup_id)
+        if not pickup:
+            return False, "Jadwal penjemputan tidak ditemukan."
+
+        if pickup['status'] != 'menunggu':
+            return False, "Tugas ini sudah diproses sebelumnya."
+
+        # 1. Ubah status penjemputan menjadi 'pelanggaran'
+        pickup['status'] = 'pelanggaran'
+        
+        # 2. Ambil data user untuk memberikan sanksi
+        user = user_repo.get_user_by_id(pickup['user_id'])
+        if user:
+            # Sanksi: Tugas berikutnya wajib unggah foto
+            user['needs_extra_verification'] = True
+            
+            try:
+                # Simpan perubahan ke repository
+                user_repo.update_user(user['id'], user)
+                # Gunakan fungsi update yang ada di repository Anda
+                data_repo.update_pickup(pickup_id, pickup) 
+                return True, f"Laporan terkirim. {user['nama']} kini wajib verifikasi foto untuk tugas selanjutnya."
+            except Exception as e:
+                return False, f"Terjadi kesalahan database: {e}"
+        
+        return False, "User terkait tidak ditemukan."
 
 class AdminService:
     """

@@ -10,31 +10,31 @@
             <h2 class="text-2xl font-bold text-gray-800">Dashboard Admin</h2>
         </div>
         <nav class="mt-6">
-            <a href="#" class="block px-6 py-3 text-blue-700 bg-blue-50 font-medium">
+            <a href="#" class="block px-6 py-3 text-blue-700 bg-blue-50 font-medium border-l-4 border-blue-700">
                 Dashboard
             </a>
-            <a href="{{ url_for('main.admin_manage_users') }}" class="block px-6 py-3 text-gray-700 hover:bg-gray-100">
+            <a href="{{ url_for('main.admin_manage_users') }}" class="block px-6 py-3 text-gray-700 hover:bg-gray-100 transition-colors">
                 Manajemen Pengguna
             </a>
-            <a href="{{ url_for('main.admin_manage_master_data') }}" class="block px-6 py-3 text-gray-700 hover:bg-gray-100">
+            <a href="{{ url_for('main.admin_manage_master_data') }}" class="block px-6 py-3 text-gray-700 hover:bg-gray-100 transition-colors">
                 Manajemen Data Master
             </a>
-            <a href="{{ url_for('main.admin_monitor_transactions') }}" class="block px-6 py-3 text-gray-700 hover:bg-gray-100">
+            <a href="{{ url_for('main.admin_monitor_transactions') }}" class="block px-6 py-3 text-gray-700 hover:bg-gray-100 transition-colors">
                 Monitor Transaksi
             </a>
         </nav>
     </aside>
+
     <main class="flex-1 overflow-y-auto">
-        
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <h1 class="text-3xl font-bold text-gray-900 mb-6">Dasbor Administrator</h1>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
                 
                 <a href="{{ url_for('main.admin_manage_users') }}" class="block p-6 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-200">
                     <div class="flex items-center space-x-4">
                         <span class="flex h-12 w-12 rounded-full bg-blue-100 items-center justify-center">
-                            <svg class="h-6 w-6 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 016-6h6v1a6 6 0 01-6 6v-1a6 6 0 016-6h6v1a6 6 0 01-6 6zM21 21v-1a6 6 0 00-6-6h-6v1a6 6 0 006 6v-1a6 6 0 006-6h-6v1a6 6 0 006 6z" /></svg>
+                            <svg class="h-6 w-6 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 016-6h6v1a6 6 0 01-6 6v-1a6 6 0 01-6 6h6v1a6 6 0 01-6 6zM21 21v-1a6 6 0 00-6-6h-6v1a6 6 0 006 6v-1a6 6 0 006-6h-6v1a6 6 0 006 6z" /></svg>
                         </span>
                         <div>
                             <h2 class="text-xl font-bold text-gray-900">Manajemen Pengguna</h2>
@@ -68,8 +68,50 @@
                 </a>
                 
             </div>
-        </div>
 
+            <div class="bg-white rounded-2xl shadow-lg p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800">Status Pelanggaran Pengguna</h2>
+                    <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-semibold">Live Monitor</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status Sanksi</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for user in users %}
+                            {% if user.role == 'pengguna' %}
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ user.nama }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.email }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {% if user.needs_extra_verification %}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                        Wajib Verifikasi Foto
+                                    </span>
+                                    {% else %}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                        Normal
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <a href="{{ url_for('main.admin_manage_users') }}" class="text-blue-600 hover:text-blue-900">Detail</a>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </main>
-    </div>
+</div>
 {% endblock %}

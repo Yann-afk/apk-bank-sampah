@@ -39,7 +39,9 @@ def dashboard():
         return render_template('dashboard_pengepul.html', title="Dasbor Pengepul", tasks=tasks)
         
     elif current_user.is_role('admin'):
-        return render_template('dashboard_admin.html', title="Dasbor Admin")
+        # UPDATE: Mengambil data user agar fitur pantau pelanggaran di dashboard admin berfungsi
+        all_users = admin_service.get_all_user_accounts()
+        return render_template('dashboard_admin.html', title="Dasbor Admin", users=all_users)
         
     else:
         # Jika peran tidak dikenali, logout saja
@@ -51,18 +53,27 @@ def dashboard():
 @login_required
 @role_required('pengguna')
 def schedule_pickup():
-    """
-    Halaman form untuk pengguna menjadwalkan penjemputan.
-    """
+    # --- LOGIKA UNTUK TESTING (Ubah True agar muncul di localhost) ---
+    is_banned = False           # Set True untuk tes tampilan Shadow Ban
+    needs_verify = True          # Set True untuk tes tampilan Upload Foto
+    ban_expiry = "2025-12-30"    # Contoh tanggal kadaluarsa ban
+    # -----------------------------------------------------------------
+
     if request.method == 'POST':
+        if is_banned:
+            flash("Akses Anda sedang dibatasi.", 'danger')
+            return redirect(url_for('main.dashboard'))
+
         tanggal = request.form.get('tanggal')
         waktu = request.form.get('waktu')
-        # Ambil alamat dari data pengguna yang login
         lokasi = current_user.data.get('alamat', 'Alamat tidak diatur') 
         notes = request.form.get('notes')
         
+        # Ambil file foto jika verifikasi aktif
+        waste_photo = request.files.get('waste_photo')
+        
         saved_pickup, message = user_service.schedule_pickup(
-            current_user.id, tanggal, waktu, lokasi, notes
+            current_user.id, tanggal, waktu, lokasi, notes, waste_photo
         )
         
         if saved_pickup:
@@ -71,7 +82,12 @@ def schedule_pickup():
         else:
             flash(message, 'danger')
             
-    return render_template('pickup_form.html', title="Jadwalkan Penjemputan")
+    # PASTIKAN variabel dikirim di sini
+    return render_template('pickup_form.html', 
+                           title="Jadwalkan Penjemputan",
+                           is_shadow_banned=is_banned, 
+                           needs_extra_verification=needs_verify,
+                           ban_until=ban_expiry)
 
 @main_bp.route('/rewards')
 @login_required
@@ -90,7 +106,6 @@ def redeem_reward(reward_id):
     """
     Rute untuk memproses permintaan penukaran reward.
     """
-    # Hanya izinkan metode POST
     if request.method == 'POST':
         ok, message = user_service.redeem_reward(current_user.id, reward_id)
         
@@ -99,7 +114,6 @@ def redeem_reward(reward_id):
         else:
             flash(message, 'danger')
             
-    # Kembali ke katalog reward
     return redirect(url_for('main.reward_catalog'))
 
 @main_bp.route('/map')
@@ -121,9 +135,7 @@ def confirm_pickup(pickup_id):
     dan menginput berat sampah.
     """
     if request.method == 'POST':
-        # Mengambil data sampah dari form
         waste_inputs = []
-        # Form akan mengirimkan data seperti 'waste_id_wt1' dan 'waste_weight_wt1'
         for key in request.form:
             if key.startswith('waste_weight_'):
                 waste_type_id = key.split('waste_weight_')[-1]
@@ -145,12 +157,28 @@ def confirm_pickup(pickup_id):
         flash(message, 'success')
         return redirect(url_for('main.dashboard'))
 
-    # Untuk metode GET
     waste_types = collector_service.get_waste_types_for_confirmation()
-    return render_template('pickup_confirmation_form.html', # Template baru
+    return render_template('pickup_confirmation_form.html', 
                            title="Konfirmasi Setoran",
                            pickup_id=pickup_id,
                            waste_types=waste_types)
+
+@main_bp.route('/report-violation/<string:pickup_id>', methods=['POST'])
+@login_required
+@role_required('pengepul')
+def report_violation(pickup_id):
+    """
+    Rute untuk melaporkan pelanggaran jika pengguna tidak meletakkan sampah.
+    """
+    # Memanggil service untuk memproses laporan pelanggaran
+    ok, message = collector_service.report_pickup_violation(pickup_id)
+    
+    if ok:
+        flash(message, 'warning')
+    else:
+        flash(message, 'danger')
+        
+    return redirect(url_for('main.dashboard'))
 
 
 # --- Rute untuk ADMIN ---
@@ -177,8 +205,6 @@ def admin_add_user():
     password = request.form.get('password')
     role = request.form.get('role')
 
-    # Memanggil service untuk menambahkan pengguna
-    # Pastikan AdminService memiliki fungsi create_user_account
     ok, message = admin_service.create_user_account(nama, email, password, role)
     
     if ok:
@@ -193,7 +219,7 @@ def admin_add_user():
 @role_required('admin')
 def admin_manage_master_data():
     """
-    Halaman admin untuk mengelola data master (Jenis Sampah & Reward).
+    Halaman admin untuk mengelola data master.
     """
     if request.method == 'POST':
         form_type = request.form.get('form_type')
@@ -215,7 +241,6 @@ def admin_manage_master_data():
         
         return redirect(url_for('main.admin_manage_master_data'))
 
-    # Untuk metode GET
     data = admin_service.get_master_data()
     return render_template(
         'admin_manage_master_data.html',
@@ -238,14 +263,12 @@ def admin_monitor_transactions():
         transactions=transactions
     )
 
-# --- Rute untuk ADMIN (Aksi CRUD) ---
-
 @main_bp.route('/admin/users/edit/<string:user_id>', methods=['POST'])
 @login_required
 @role_required('admin')
 def admin_edit_user(user_id):
     """
-    Rute untuk memproses perubahan data pengguna (Edit).
+    Rute untuk memproses perubahan data pengguna.
     """
     nama = request.form.get('nama')
     email = request.form.get('email')
@@ -268,6 +291,22 @@ def admin_delete_user(user_id):
     Rute untuk menghapus akun pengguna secara permanen.
     """
     ok, message = admin_service.delete_user_account(user_id)
+    
+    if ok:
+        flash(message, 'success')
+    else:
+        flash(message, 'danger')
+        
+    return redirect(url_for('main.admin_manage_users'))
+
+@main_bp.route('/admin/users/resolve-violation/<string:user_id>', methods=['POST'])
+@login_required
+@role_required('admin')
+def admin_resolve_violation(user_id):
+    """
+    Rute untuk mencabut sanksi wajib verifikasi foto dari pengguna.
+    """
+    ok, message = admin_service.resolve_user_violation(user_id)
     
     if ok:
         flash(message, 'success')

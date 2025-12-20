@@ -153,6 +153,19 @@ class DataRepository(BaseRepository):
         self._save_data(data)
         return pickup_data
 
+    def update_pickup(self, pickup_id, updated_data):
+        """
+        Metode baru: Mengupdate data penjemputan (misal: ubah status jadi pelanggaran).
+        """
+        data = self._load_data()
+        if 'pickups' in data and pickup_id in data['pickups']:
+            # Pastikan ID tetap konsisten
+            updated_data['id'] = pickup_id
+            data['pickups'][pickup_id] = updated_data
+            self._save_data(data)
+            return True
+        return False
+
     def get_all_transactions(self):
         data = self._load_data()
         return list(data.get('transactions', {}).values())

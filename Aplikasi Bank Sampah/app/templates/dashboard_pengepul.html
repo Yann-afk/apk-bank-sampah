@@ -3,12 +3,11 @@
 {% block title %}Tugas Penjemputan{% endblock %}
 
 {% block content %}
-<!-- Desain berdasarkan Gambar 8 -->
 <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
         <div class="p-6 border-b border-gray-200">
             <h1 class="text-2xl font-bold text-gray-900">Tugas Penjemputan</h1>
-            <p class="text-gray-600">Selasa, 18 Oktober 2025</p> <!-- TODO: Buat tanggal ini dinamis -->
+            <p class="text-gray-600">{{ datetime_now if datetime_now else "Hari Ini" }}</p> 
         </div>
         
         <div class="p-6">
@@ -19,15 +18,19 @@
             <div class="space-y-5">
                 {% if tasks %}
                     {% for task in tasks %}
-                    <div class="border border-gray-200 rounded-lg p-5">
+                    <div class="border border-gray-200 rounded-lg p-5 hover:border-green-300 transition-colors">
                         <div class="flex justify-between items-start mb-3">
                             <div>
                                 <p class="text-sm font-medium text-green-600">Pukul {{ task.waktu }} WIB</p>
-                                <p class="text-lg font-bold text-gray-900">{{ task.user_nama | default('Pengguna') }}</p> <!-- (Harus ditambahkan di service) -->
+                                <p class="text-lg font-bold text-gray-900">{{ task.user_nama | default('Pengguna') }}</p>
                             </div>
                             {% if task.status == 'menunggu' %}
                                 <span class="px-3 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
                                     Menunggu
+                                </span>
+                            {% elif task.status == 'pelanggaran' %}
+                                <span class="px-3 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
+                                    Dilaporkan
                                 </span>
                             {% else %}
                                 <span class="px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
@@ -37,30 +40,100 @@
                         </div>
                         
                         <div class="flex items-center text-gray-500 text-sm mb-4">
-                            <!-- Icon Lokasi (SVG) -->
-                            <svg class="h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                            <svg class="h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
                             <span>{{ task.lokasi }}</span>
                         </div>
+
+                        {# --- PENGEMBANGAN INTEGRASI FOTO (PERBAIKAN LINK ZOOM) --- #}
+                        {% if task.photo_path %}
+                        <div class="mb-4">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Bukti Visual Sampah</p>
+                            <div class="relative group">
+                                <a href="{{ url_for('static', filename='uploads/waste_photos/' + task.photo_path) }}" target="_blank" class="block overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
+                                    <img src="{{ url_for('static', filename='uploads/waste_photos/' + task.photo_path) }}" 
+                                         alt="Foto Verifikasi" 
+                                         class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                                         onerror="this.onerror=null; this.src='https://placehold.co/600x400?text=Gambar+Tidak+Ditemukan';">
+                                    
+                                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity flex items-center justify-center">
+                                        <span class="text-white opacity-0 group-hover:opacity-100 bg-black bg-opacity-50 px-3 py-1 rounded-full text-xs">🔍 Klik untuk Zoom</span>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
                         
                         {% if task.status == 'menunggu' %}
-                        <a href="{{ url_for('main.confirm_pickup', pickup_id=task.id) }}">
-                            <button class="w-full bg-green-600 text-white font-semibold py-3 px-4 rounded-lg shadow hover:bg-green-700 transition duration-150">
-                                Konfirmasi Setoran
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <a href="{{ url_for('main.confirm_pickup', pickup_id=task.id) }}" class="block">
+                                <button class="w-full bg-green-600 text-white font-semibold py-3 px-4 rounded-lg shadow-sm hover:bg-green-700 active:transform active:scale-[0.98] transition duration-150">
+                                    Konfirmasi Setoran
+                                </button>
+                            </a>
+                            
+                            {# --- FITUR LAPOR PELANGGARAN --- #}
+                            <button onclick="confirmViolation('{{ task.id }}', '{{ task.user_nama }}')" class="w-full bg-white text-red-600 border border-red-200 font-semibold py-3 px-4 rounded-lg shadow-sm hover:bg-red-50 active:transform active:scale-[0.98] transition duration-150 flex items-center justify-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                Lapor Pelanggaran
                             </button>
-                        </a>
+                        </div>
                         {% else %}
-                        <button class="w-full bg-gray-300 text-gray-600 font-semibold py-3 px-4 rounded-lg cursor-not-allowed" disabled>
-                            Telah Selesai
+                        <button class="w-full bg-gray-100 text-gray-400 font-semibold py-3 px-4 rounded-lg cursor-not-allowed border border-gray-200" disabled>
+                            Tugas {{ 'Dilaporkan' if task.status == 'pelanggaran' else 'Selesai' }}
                         </button>
                         {% endif %}
                     </div>
                     {% endfor %}
                 {% else %}
-                    <p class="text-gray-500 text-center py-4">Tidak ada tugas penjemputan hari ini.</p>
+                    <div class="text-center py-10">
+                        <div class="bg-gray-50 rounded-full h-16 w-16 flex items-center justify-center mx-auto mb-4">
+                            <svg class="h-8 w-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                        </div>
+                        <p class="text-gray-500">Tidak ada tugas penjemputan hari ini.</p>
+                    </div>
                 {% endif %}
-                
             </div>
         </div>
     </div>
 </div>
+
+{# --- MODAL KONFIRMASI PELANGGARAN --- #}
+<div id="violationModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl">
+        <div class="text-red-600 bg-red-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        </div>
+        <h3 class="text-lg font-bold text-center text-gray-900 mb-2">Lapor Pelanggaran?</h3>
+        <p class="text-gray-500 text-center text-sm mb-6">Anda melaporkan bahwa <span id="targetUserName" class="font-bold"></span> tidak meletakkan sampah di lokasi. Tugas akan dibatalkan.</p>
+        
+        <form id="violationForm" method="POST" action="">
+            <div class="flex flex-col gap-3">
+                <button type="submit" class="w-full bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition">Ya, Laporkan</button>
+                <button type="button" onclick="closeModal()" class="w-full bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 transition">Batal</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function confirmViolation(taskId, userName) {
+        const modal = document.getElementById('violationModal');
+        const form = document.getElementById('violationForm');
+        const nameSpan = document.getElementById('targetUserName');
+        
+        // Update data di modal
+        nameSpan.innerText = userName;
+        // Ganti URL action sesuai route backend Anda nanti (misal: /report-violation/<id>)
+        form.action = "/report-violation/" + taskId;
+        
+        modal.classList.remove('hidden');
+    }
+
+    function closeModal() {
+        document.getElementById('violationModal').classList.add('hidden');
+    }
+</script>
 {% endblock %}

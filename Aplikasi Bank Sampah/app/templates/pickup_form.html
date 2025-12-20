@@ -6,13 +6,65 @@
 <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="bg-white p-8 rounded-2xl shadow-lg">
         <a href="{{ url_for('main.dashboard') }}" class="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 mb-4">
-            <svg class="h-5 w-5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            <svg class="h-5 w-5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
             Kembali ke Dasbor
         </a>
         <h1 class="text-2xl font-bold text-gray-900 mb-6">Formulir Penjemputan Sampah</h1>
-        
-        <form method="POST" action="{{ url_for('main.schedule_pickup') }}" class="space-y-6">
+
+        {# 1. LOGIKA SHADOW BAN #}
+        {# Mengecek apakah user sedang dalam masa ban penjemputan #}
+        {% if current_user.data.is_shadow_banned or is_shadow_banned %}
+        <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-lg font-bold text-red-800">Akses Penjemputan Dibatasi</h3>
+                    <p class="text-sm text-red-700 mt-2">
+                        Karena adanya pelanggaran berulang, fitur penjemputan Anda dinonaktifkan sementara hingga <strong>{{ current_user.data.ban_until or ban_until }}</strong>.
+                    </p>
+                    <div class="mt-4 p-3 bg-white rounded border border-red-200">
+                        <p class="text-sm font-semibold text-red-800">Solusi:</p>
+                        <p class="text-sm text-red-700 italic">Silakan antar sampah Anda secara mandiri ke titik drop-off terdekat.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# 2. FORM UTAMA #}
+        {% else %}
+        <form method="POST" action="{{ url_for('main.schedule_pickup') }}" class="space-y-6" enctype="multipart/form-data">
             
+            {# --- FITUR VERIFIKASI TAMBAHAN --- #}
+            {# Muncul jika user sering melanggar namun belum sampai tahap shadow ban #}
+            {% if current_user.data.needs_extra_verification or needs_extra_verification %}
+            <div class="p-5 bg-amber-50 border-2 border-dashed border-amber-300 rounded-xl">
+                <label class="block text-sm font-bold text-amber-900 mb-2">📸 Verifikasi Sampah Siap Angkut</label>
+                <p class="text-xs text-amber-700 mb-4">Akun Anda memerlukan verifikasi visual. Harap unggah foto sampah yang sudah dikemas rapi.</p>
+                
+                <div class="space-y-3">
+                    <input type="file" 
+                           id="waste_photo"
+                           name="waste_photo" 
+                           accept="image/*" 
+                           onchange="previewImage(event)"
+                           class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-amber-100 file:text-amber-700 hover:file:bg-amber-200 cursor-pointer"
+                           required>
+                    
+                    <div id="image_preview_container" class="hidden">
+                        <p class="text-xs text-gray-500 mb-1">Pratinjau foto:</p>
+                        <img id="output_image" class="w-full max-h-48 object-cover rounded-lg border border-amber-200">
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {# -------------------------------- #}
+
             <div>
                 <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-1">Pilih Tanggal</label>
                 <input type="date" id="tanggal" name="tanggal"
@@ -31,7 +83,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Lokasi Penjemputan</label>
                 <div class="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg">
                     <p class="text-gray-700">{{ current_user.data.alamat | default('Harap atur alamat di profil Anda.') }}</p>
-                    <span class="text-xs text-gray-500 italic">(Lokasi diambil dari alamat terdaftar Anda)</span>
+                    <span class="text-xs text-gray-500 italic">(Otomatis sesuai alamat profil)</span>
                 </div>
             </div>
             
@@ -39,17 +91,29 @@
                 <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Catatan Tambahan (Opsional)</label>
                 <textarea id="notes" name="notes" rows="3"
                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                          placeholder="Contoh: Taruh sampah di depan gerbang."></textarea>
+                          placeholder="Contoh: Letakkan di dekat tiang listrik depan rumah."></textarea>
             </div>
             
-            <div>
-                <button type="submit"
-                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150">
-                    Konfirmasi Jadwal
-                </button>
-            </div>
-            
+            <button type="submit"
+                    class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150">
+                Konfirmasi Jadwal
+            </button>
         </form>
+        {% endif %}
     </div>
 </div>
+
+{# JavaScript untuk Preview Gambar #}
+<script>
+    function previewImage(event) {
+        var reader = new FileReader();
+        reader.onload = function() {
+            var output = document.getElementById('output_image');
+            var container = document.getElementById('image_preview_container');
+            output.src = reader.result;
+            container.classList.remove('hidden');
+        }
+        reader.readAsDataURL(event.target.files[0]);
+    }
+</script>
 {% endblock %}
