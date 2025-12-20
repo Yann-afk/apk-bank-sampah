@@ -214,3 +214,45 @@ def admin_monitor_transactions():
         title="Monitor Transaksi",
         transactions=transactions
     )
+
+# --- Rute untuk ADMIN (Lanjutan) ---
+
+@main_bp.route('/admin/users/edit/<string:user_id>', methods=['POST'])
+@login_required
+@role_required('admin')
+def admin_edit_user(user_id):
+    """
+    Rute untuk memproses perubahan data pengguna (Edit).
+    """
+    nama = request.form.get('nama')
+    email = request.form.get('email')
+    role = request.form.get('role')
+    
+    # Memanggil service untuk update data ke database
+    # Pastikan AdminService memiliki fungsi update_user_account
+    ok, message = admin_service.update_user_account(user_id, nama, email, role)
+    
+    if ok:
+        flash(message, 'success')
+    else:
+        flash(message, 'danger')
+        
+    return redirect(url_for('main.admin_manage_users'))
+
+@main_bp.route('/admin/users/delete/<string:user_id>', methods=['POST'])
+@login_required
+@role_required('admin')
+def admin_delete_user(user_id):
+    """
+    Rute untuk menghapus akun pengguna secara permanen.
+    """
+    # Memanggil service untuk hapus data dari database
+    # Pastikan AdminService memiliki fungsi delete_user_account
+    ok, message = admin_service.delete_user_account(user_id)
+    
+    if ok:
+        flash(message, 'success')
+    else:
+        flash(message, 'danger')
+        
+    return redirect(url_for('main.admin_manage_users'))

@@ -1,7 +1,5 @@
 from datetime import datetime
 from app.repository import UserRepository, DataRepository
-# Hapus import untuk hashing, karena tidak digunakan lagi
-# from werkzeug.security import generate_password_hash, check_password_hash
 
 # Inisialisasi repositori
 user_repo = UserRepository()
@@ -18,12 +16,8 @@ class AuthService:
         # Cek apakah email sudah ada
         if user_repo.get_user_by_email(email):
             return None, "Email sudah terdaftar."
-
-        # Hapus hashing password
-        # password_hash = generate_password_hash(password)
         
-        # PERINGATAN: Menyimpan password sebagai plain text sangat tidak aman.
-        # Ini dilakukan hanya atas permintaan khusus.
+        # Menyimpan password sebagai plain text (Sesuai permintaan khusus)
         password_plain = password
 
         # Siapkan data pengguna baru
@@ -31,8 +25,7 @@ class AuthService:
             "id": None, # Akan di-generate oleh repository
             "nama": nama,
             "email": email,
-            # "password_hash": password_hash, # Ganti baris ini
-            "password": password_plain,       # Menjadi baris ini
+            "password": password_plain,
             "role": role,
             "total_poin": 0,
             "alamat": alamat,
@@ -55,8 +48,6 @@ class AuthService:
         if not user_data:
             return None, "Email tidak ditemukan."
             
-        # Ganti pengecekan hash dengan pengecekan plain text
-        # if not check_password_hash(user_data.get('password_hash', ''), password):
         if user_data.get('password') != password:
             return None, "Password salah."
             
@@ -75,8 +66,8 @@ class PenggunaService:
             "tanggal": tanggal,
             "waktu": waktu,
             "lokasi": lokasi,
-            "status": "menunggu", # Status awal
-            "pengepul_id": None, # Akan diisi oleh pengepul/sistem
+            "status": "menunggu",
+            "pengepul_id": None,
             "notes": notes
         }
         try:
@@ -91,12 +82,11 @@ class PenggunaService:
         """
         user_data = user_repo.get_user_by_id(user_id)
         pickups = data_repo.get_pickups_by_user_id(user_id)
-        # Urutkan pickups, terbaru dulu
         pickups.sort(key=lambda x: x.get('tanggal'), reverse=True)
         
         return {
             "user": user_data,
-            "recent_pickups": pickups[:5] # Ambil 5 terbaru
+            "recent_pickups": pickups[:5]
         }
 
     def get_rewards_catalog(self):
@@ -120,28 +110,23 @@ class PenggunaService:
         poin_dibutuhkan = reward.get('poin_dibutuhkan', 0)
         poin_pengguna = user.get('total_poin', 0)
 
-        # 1. Cek kecukupan poin
         if poin_pengguna < poin_dibutuhkan:
             return False, "Poin Anda tidak cukup untuk menukar reward ini."
             
-        # 2. Kurangi poin pengguna
         user['total_poin'] = poin_pengguna - poin_dibutuhkan
         
-        # 3. Buat data transaksi
         transaction_data = {
             "user_id": user['id'],
             "tanggal": datetime.now().strftime('%Y-%m-%d'),
             "tipe": "redeem_reward",
             "deskripsi": f"Tukar: {reward.get('nama')}",
-            "jumlah_poin": -poin_dibutuhkan # Poin berkurang
+            "jumlah_poin": -poin_dibutuhkan
         }
         
-        # 4. Simpan (pseudo-transaksi)
         try:
             data_repo.redeem_reward_transaction(user, transaction_data)
             return True, f"Reward '{reward.get('nama')}' berhasil ditukar!"
         except Exception as e:
-            # Di aplikasi nyata, DB RDBMS akan menangani rollback
             return False, f"Gagal menyimpan transaksi redeem: {e}"
 
 class PengepulService:
@@ -153,7 +138,6 @@ class PengepulService:
         Mengambil daftar tugas untuk pengepul.
         """
         all_tasks = data_repo.get_pickups_by_collector_id(collector_id)
-        # Filter tugas: yang 'menunggu' atau yang ditugaskan ke dia
         tasks = [
             task for task in all_tasks 
             if task['status'] == 'menunggu' or task.get('pengepul_id') == collector_id
@@ -170,7 +154,6 @@ class PengepulService:
     def confirm_pickup_and_calculate_points(self, pickup_id, collector_id, waste_inputs):
         """
         Logika inti: Konfirmasi penjemputan dan hitung poin.
-        waste_inputs adalah list of dict, cth: [{'waste_type_id': 'wt1', 'weight': '2.5'}]
         """
         pickup = data_repo.get_pickup_by_id(pickup_id)
         if not pickup:
@@ -184,7 +167,7 @@ class PengepulService:
             return None, "Data pengguna tidak ditemukan."
 
         all_waste_types = data_repo.get_all_waste_types()
-        waste_map = {wt['id']: wt for wt in all_waste_types} # Untuk lookup cepat
+        waste_map = {wt['id']: wt for wt in all_waste_types}
 
         total_poin = 0
         deskripsi_transaksi = "Setor sampah ("
@@ -207,14 +190,10 @@ class PengepulService:
         if total_poin == 0:
             return None, "Tidak ada sampah yang diinput. Poin tidak ditambahkan."
 
-        # Update data pickup
         pickup['status'] = 'selesai'
         pickup['pengepul_id'] = collector_id
-
-        # Update poin pengguna
         user['total_poin'] = user.get('total_poin', 0) + total_poin
         
-        # Buat data transaksi
         transaction_data = {
             "user_id": user['id'],
             "tanggal": datetime.now().strftime('%Y-%m-%d'),
@@ -223,7 +202,6 @@ class PengepulService:
             "jumlah_poin": total_poin
         }
         
-        # Simpan semua perubahan (pseudo-transaksi)
         try:
             data_repo.confirm_pickup_transaction(pickup, transaction_data, user)
             return pickup, f"Konfirmasi berhasil. {total_poin} poin ditambahkan ke pengguna."
@@ -235,19 +213,51 @@ class AdminService:
     Service untuk logika bisnis yang terkait dengan Admin.
     """
     def get_all_user_accounts(self):
+        """Mengambil semua akun pengguna."""
         return user_repo.get_all_users()
+
+    def update_user_account(self, user_id, nama, email, role):
+        """Memperbarui data akun pengguna."""
+        try:
+            user = user_repo.get_user_by_id(user_id)
+            if not user:
+                return False, "Pengguna tidak ditemukan."
+            
+            user['nama'] = nama
+            user['email'] = email
+            user['role'] = role
+            
+            # Pastikan UserRepository memiliki fungsi update_user
+            success = user_repo.update_user(user_id, user) 
+            if success:
+                return True, f"Data pengguna {nama} berhasil diperbarui."
+            return False, "Gagal mengupdate data di database."
+        except Exception as e:
+            return False, f"Gagal memperbarui data: {e}"
+
+    def delete_user_account(self, user_id):
+        """Menghapus akun pengguna."""
+        try:
+            # Pastikan UserRepository memiliki fungsi delete_user
+            success = user_repo.delete_user(user_id)
+            if success:
+                return True, "Pengguna berhasil dihapus."
+            return False, "Pengguna tidak ditemukan atau gagal dihapus."
+        except Exception as e:
+            return False, f"Gagal menghapus pengguna: {e}"
         
     def get_master_data(self):
+        """Mengambil data master."""
         return {
             "waste_types": data_repo.get_all_waste_types(),
             "rewards": data_repo.get_all_rewards()
         }
         
     def get_all_transactions(self):
+        """Mengambil semua riwayat transaksi."""
         transactions = data_repo.get_all_transactions()
         users_map = {u['id']: u for u in user_repo.get_all_users()}
         
-        # Tambahkan nama pengguna ke data transaksi untuk tampilan
         for t in transactions:
             t['user_nama'] = users_map.get(t['user_id'], {}).get('nama', 'N/A')
             

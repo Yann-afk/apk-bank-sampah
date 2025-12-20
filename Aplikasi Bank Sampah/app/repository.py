@@ -3,14 +3,8 @@ import os
 import uuid # Untuk generate ID unik
 
 # Menentukan path ke file database JSON
-# Menggunakan os.path untuk membuatnya kompatibel antar sistem operasi
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILE = os.path.join(BASE_DIR, '..', 'database.json')
-
-# PENTING: Dalam aplikasi nyata, menggunakan file JSON tunggal untuk database
-# akan menyebabkan masalah besar (race conditions, performa buruk).
-# Ini hanya untuk tujuan demo sesuai permintaan.
-# Di produksi, gunakan database seperti PostgreSQL, MySQL, atau Firestore.
 
 class BaseRepository:
     """
@@ -18,28 +12,17 @@ class BaseRepository:
     ke file database JSON.
     """
     def _load_data(self):
-        """
-        Metode internal untuk membaca seluruh data dari database.json.
-        """
         try:
             with open(DB_FILE, 'r') as f:
                 return json.load(f)
-        except FileNotFoundError:
-            # Jika file tidak ada, kembalikan struktur data kosong
-            return {"users": {}, "waste_types": {}, "rewards": {}, "pickups": {}, "transactions": {}}
-        except json.JSONDecodeError:
-            # Jika file korup, kembalikan struktur data kosong
+        except (FileNotFoundError, json.JSONDecodeError):
             return {"users": {}, "waste_types": {}, "rewards": {}, "pickups": {}, "transactions": {}}
 
     def _save_data(self, data):
-        """
-        Metode internal untuk menulis seluruh data kembali ke database.json.
-        """
         try:
             with open(DB_FILE, 'w') as f:
                 json.dump(data, f, indent=2)
         except IOError as e:
-            # Menangani error jika tidak bisa menulis file
             print(f"Error saving data: {e}")
 
 class UserRepository(BaseRepository):
@@ -63,10 +46,8 @@ class UserRepository(BaseRepository):
 
     def save_user(self, user_data):
         data = self._load_data()
-        
-        # Jika 'id' belum ada, buat ID baru
         if 'id' not in user_data or not user_data['id']:
-            user_data['id'] = f"u{uuid.uuid4().hex[:6]}" # ID unik singkat
+            user_data['id'] = f"u{uuid.uuid4().hex[:6]}"
         
         if 'users' not in data:
             data['users'] = {}
@@ -75,14 +56,37 @@ class UserRepository(BaseRepository):
         self._save_data(data)
         return user_data
 
+    # --- TAMBAHAN UNTUK FITUR EDIT & HAPUS ---
+
+    def update_user(self, user_id, updated_data):
+        """
+        Metode baru: Mengupdate data pengguna yang sudah ada.
+        """
+        data = self._load_data()
+        if 'users' in data and user_id in data['users']:
+            # Pastikan ID tidak berubah
+            updated_data['id'] = user_id
+            data['users'][user_id] = updated_data
+            self._save_data(data)
+            return True
+        return False
+
+    def delete_user(self, user_id):
+        """
+        Metode baru: Menghapus pengguna berdasarkan ID.
+        """
+        data = self._load_data()
+        if 'users' in data and user_id in data['users']:
+            del data['users'][user_id]
+            self._save_data(data)
+            return True
+        return False
+
 class DataRepository(BaseRepository):
     """
-    Repositori untuk mengelola data master (sampah, reward)
-    dan data transaksional (penjemputan, transaksi).
+    Repositori untuk mengelola data master dan data transaksional.
     """
 
-    # --- Master Data ---
-    
     def get_all_waste_types(self):
         data = self._load_data()
         return list(data.get('waste_types', {}).values())
@@ -112,11 +116,8 @@ class DataRepository(BaseRepository):
         return reward_data
 
     def get_reward_by_id(self, reward_id):
-        """Mengambil data reward tunggal berdasarkan ID."""
         data = self._load_data()
         return data.get('rewards', {}).get(reward_id)
-
-    # --- Transactional Data ---
 
     def get_all_pickups(self):
         data = self._load_data()
@@ -134,7 +135,6 @@ class DataRepository(BaseRepository):
         data = self._load_data()
         tasks = []
         for pickup in data.get('pickups', {}).values():
-            # Menampilkan tugas yang ditugaskan atau yang masih 'menunggu'
             if pickup.get('pengepul_id') == collector_id or pickup['status'] == 'menunggu':
                 tasks.append(pickup)
         return tasks
@@ -157,50 +157,16 @@ class DataRepository(BaseRepository):
         data = self._load_data()
         return list(data.get('transactions', {}).values())
 
-    def save_transaction(self, trans_data):
-        data = self._load_data()
-        if 'id' not in trans_data:
-            trans_data['id'] = f"t{uuid.uuid4().hex[:6]}"
-        if 'transactions' not in data:
-            data['transactions'] = {}
-        data['transactions'][trans_data['id']] = trans_data
-        self._save_data(data)
-        return trans_data
-
-    # --- Metode Update Kompleks ---
-    
-    def update_user_points_and_save(self, user_id, new_total_points):
-        """
-        Metode ini mengupdate poin pengguna secara spesifik.
-        Ini adalah bagian dari "transaksi" file JSON.
-        """
-        data = self._load_data()
-        if user_id in data.get('users', {}):
-            data['users'][user_id]['total_poin'] = new_total_points
-            self._save_data(data)
-            return True
-        return False
-        
     def confirm_pickup_transaction(self, pickup_data, transaction_data, user_data):
-        """
-        Menyimpan beberapa update data sekaligus (pseudo-transaksi).
-        1. Update pickup
-        2. Buat transaksi baru
-        3. Update poin pengguna
-        """
         data = self._load_data()
-        
-        # 1. Update pickup
         if 'pickups' not in data: data['pickups'] = {}
         data['pickups'][pickup_data['id']] = pickup_data
         
-        # 2. Buat transaksi baru
         if 'id' not in transaction_data:
             transaction_data['id'] = f"t{uuid.uuid4().hex[:6]}"
         if 'transactions' not in data: data['transactions'] = {}
         data['transactions'][transaction_data['id']] = transaction_data
         
-        # 3. Update poin pengguna
         if 'users' not in data: data['users'] = {}
         data['users'][user_data['id']] = user_data
         
@@ -208,20 +174,12 @@ class DataRepository(BaseRepository):
         return True
 
     def redeem_reward_transaction(self, user_data, transaction_data):
-        """
-        Menyimpan update data untuk redeem reward (pseudo-transaksi).
-        1. Buat transaksi baru
-        2. Update poin pengguna
-        """
         data = self._load_data()
-        
-        # 1. Buat transaksi baru
         if 'id' not in transaction_data:
             transaction_data['id'] = f"t{uuid.uuid4().hex[:6]}"
         if 'transactions' not in data: data['transactions'] = {}
         data['transactions'][transaction_data['id']] = transaction_data
         
-        # 2. Update poin pengguna
         if 'users' not in data: data['users'] = {}
         data['users'][user_data['id']] = user_data
         
